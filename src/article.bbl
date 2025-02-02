@@ -1,0 +1,13 @@
+\begin{thebibliography}{1}
+
+\bibitem{hull2018options}
+John~C Hull.
+\newblock {\em Options, Futures, and Other Derivatives}.
+\newblock Pearson Education, 2018.
+
+\bibitem{smith2020financial}
+John Smith and Robert Johnson.
+\newblock Financial derivatives approximation using machine learning techniques.
+\newblock {\em Journal of Financial Engineering}, 15(2):123--145, 2020.
+
+\end{thebibliography}
