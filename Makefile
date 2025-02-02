@@ -1,20 +1,23 @@
 .PHONY: all clean watch help
 
+TEX_DIR = latex
+BUILD_DIR = build
+
 # Default target
-all: build/article.pdf
+all: $(BUILD_DIR)/article.pdf
 
 # Main PDF build
-build/article.pdf: src/article.tex src/references.bib
-	latexmk -pdf -outdir=build src/article.tex
+$(BUILD_DIR)/article.pdf: $(TEX_DIR)/article.tex $(TEX_DIR)/references.bib
+	latexmk -pdf -outdir=$(BUILD_DIR) $(TEX_DIR)/article.tex
 
 # Clean all generated files
 clean:
 	latexmk -C
-	rm -rf build/
+	rm -rf $(BUILD_DIR)/
 
 # Watch for changes and rebuild
 watch:
-	latexmk -pdf -pvc -outdir=build src/article.tex
+	latexmk -pdf -pvc -outdir=$(BUILD_DIR) $(TEX_DIR)/article.tex
 
 # Help target
 help:

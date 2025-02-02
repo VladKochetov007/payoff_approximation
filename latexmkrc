@@ -2,11 +2,11 @@
 $out_dir = 'build';
 
 # Source directory
-@default_files = ('src/article.tex');
+@default_files = ('latex/article.tex');
 
 # Add src directory to the search path for input files
-ensure_path( 'BIBINPUTS', './src' );
-ensure_path( 'TEXINPUTS', './src' );
+ensure_path( 'BIBINPUTS', './latex' );
+ensure_path( 'TEXINPUTS', './latex' );
 
 # Use PDF mode
 $pdf_mode = 1;
