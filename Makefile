@@ -5,7 +5,7 @@ all: build/article.pdf
 
 # Main PDF build
 build/article.pdf: src/article.tex src/references.bib
-	latexmk -pdf
+	latexmk -pdf -outdir=build src/article.tex
 
 # Clean all generated files
 clean:
@@ -14,7 +14,7 @@ clean:
 
 # Watch for changes and rebuild
 watch:
-	latexmk -pdf -pvc
+	latexmk -pdf -pvc -outdir=build src/article.tex
 
 # Help target
 help:
