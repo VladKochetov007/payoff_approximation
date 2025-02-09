@@ -119,6 +119,29 @@ The evaluation points \( \{S_k\} \) are typically distributed around the current
 spot price to emphasize approximation accuracy in relevant price regions.
 
 \section{Results}
+\subsection{Distribution-Based Trading Strategy}
+The approximation method enables novel trading strategies that exploit distributional forecasts rather than direct price predictions. By constructing portfolios that profit from specific distribution characteristics (e.g., fat tails or volatility clustering), traders can:
+
+\begin{itemize}
+\item Hedge against forecasted distribution features
+\item Express views on higher moments of price distribution
+\item Implement volatility surface arbitrage strategies
+\end{itemize}
+
+The key advantage emerges when combining the approximation with distribution forecasts $\mathbb{P}(S_T)$:
+ 
+\begin{equation}
+\mathbb{E}[V(S_T)] = \int_{0}^{\infty} V(S) \mathbb{P}(S_T = S) dS
+\end{equation}
+
+Optimal portfolio weights $\boldsymbol{\theta}^*$ maximize the expected payout under forecasted distribution:
+
+\begin{equation}
+\boldsymbol{\theta}^* = \argmax_{\boldsymbol{\theta}} \mathbb{E}\left[\hat{V}(S_T;\boldsymbol{\theta})\right] - \lambda \text{Var}\left(\hat{V}(S_T;\boldsymbol{\theta})\right)
+\end{equation}
+
+where $\lambda$ represents risk aversion parameter.
+
 \begin{figure}[htbp]
 \centering
 \input{regularization_comparison.tex}
