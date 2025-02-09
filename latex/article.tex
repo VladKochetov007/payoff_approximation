@@ -12,9 +12,9 @@
 
 % Define keywords command
 \providecommand{\keywords}[1]{\textbf{Keywords:} #1}
-
-\title{\rule{\textwidth}{4pt}\\[0.5cm]
-\textbf{Discrete payout profile approximation with vanilla European options}\\[0.5cm]
+\title{\rule{\textwidth}{4pt}\\
+\textbf{From Distribution Forecasts to Vanilla Portfolios: \\[0.2cm]
+Regularized Payout Approximation in Derivative Space}\\[0.2cm]
 \rule{\textwidth}{2pt}}
 \author{\small \textbf{Vlad Kochetov} \\
     \small Faculty of Mechanics and Mathematics, \\
@@ -107,26 +107,11 @@ The discrete optimization problem is solved using regularized least squares:
 \boldsymbol{\theta}^* = (\mathbf{A}^\top \mathbf{A} + \gamma \mathbf{I})^{-1} \mathbf{A}^\top \mathbf{b}
 \end{equation}
 
-where:
-\begin{itemize}
-\item \( \mathbf{A} \in \mathbb{R}^{N \times (n+m+1)} \): Matrix of basis payoffs
-\item \( \mathbf{b} \in \mathbb{R}^N \): Target payoff values
-\item \( \gamma \): Regularization parameter controlling solution smoothness
-\item \( \mathbf{I} \): Identity matrix for L2 regularization
-\end{itemize}
-
-The evaluation points \( \{S_k\} \) are typically distributed around the current
-spot price to emphasize approximation accuracy in relevant price regions.
+where $\mathbf{A} \in \mathbb{R}^{N \times (n+m+1)}$ represents the matrix of basis payoffs, $\mathbf{b} \in \mathbb{R}^N$ contains target payoff values, $\gamma$ controls solution smoothness through regularization, and $\mathbf{I}$ denotes the identity matrix for L2 regularization. Evaluation points $\{S_k\}$ are typically distributed around the current spot price to emphasize approximation accuracy in relevant price regions.
 
 \section{Results}
 \subsection{Distribution-Based Trading Strategy}
-The approximation method enables novel trading strategies that exploit distributional forecasts rather than direct price predictions. By constructing portfolios that profit from specific distribution characteristics (e.g., fat tails or volatility clustering), traders can:
-
-\begin{itemize}
-\item Hedge against forecasted distribution features
-\item Express views on higher moments of price distribution
-\item Implement volatility surface arbitrage strategies
-\end{itemize}
+The approximation method enables novel trading strategies that exploit distributional forecasts rather than direct price predictions. Traders can hedge against forecasted distribution features, express views on higher moments of price distribution, and implement volatility surface arbitrage strategies through carefully constructed option portfolios.
 
 The key advantage emerges when combining the approximation with distribution forecasts $\mathbb{P}(S_T)$:
  
