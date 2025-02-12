@@ -1,0 +1,28 @@
+\begin{tikzpicture}
+\begin{axis}[
+    width=0.9\textwidth,
+    height=6cm,
+    grid=both,
+    grid style={line width=.1pt, draw=gray!10},
+    major grid style={line width=.2pt,draw=gray!50},
+    xlabel style={font=\tiny},
+    ylabel style={font=\tiny},
+    tick label style={font=\tiny},
+    title style={font=\small},
+    legend style={font=\tiny, at={(0.02,0.98)}, anchor=north west},
+    xlabel={Underlying Asset Price},
+    ylabel={Payout},
+    title={Regularization Methods Comparison}
+]
+
+\addplot[thick, black] table[x index=0,y index=1] {regularization_comparison.dat};
+\addlegendentry{Target Payout}
+
+\addplot[thick, dashed, red] table[x index=0,y index=2] {regularization_comparison.dat};
+\addlegendentry{L2 Regularization Approximation}
+
+\addplot[thick, dashdotted, blue] table[x index=0,y index=3] {regularization_comparison.dat};
+\addlegendentry{L1 Regularization Approximation}
+
+\end{axis}
+\end{tikzpicture}

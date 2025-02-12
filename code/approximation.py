@@ -1,9 +1,10 @@
 import numpy as np
 from scipy.optimize import minimize
 from typing import Callable, Tuple
+import matplotlib
+matplotlib.use('Agg')  # Добавить в начало файла
 import matplotlib.pyplot as plt
 from sklearn.linear_model import Lasso
-import tikzplotlib  # Добавить в импорты
 
 def create_basis_functions(strikes: list[float], spot: float) -> list[Callable[[float], float]]:
     """Generate call/put payoff functions for given strikes"""
@@ -99,33 +100,58 @@ def example_usage():
     approx_l2 = sum(w*f(S_test) for w, f in zip(weights_l2, basis)) + lambda_l2*S_test
     approx_l1 = sum(w*f(S_test) for w, f in zip(weights_l1, basis)) + lambda_l1*S_test
     
-    # Create figure
+    # Create figure with improved styling
     plt.figure(figsize=(14, 7))
     plt.plot(S_test, target_values, 'k-', label='Target Payout', lw=3)
-    plt.plot(S_test, approx_l2, '--', label='L2 Regularization', lw=2)
-    plt.plot(S_test, approx_l1, '-.', label='L1 Regularization', lw=2)
-    plt.title("Regularization Methods Comparison", fontsize=14)
-    plt.xlabel("Underlying Asset Price", fontsize=12)
-    plt.ylabel("Payout", fontsize=12)
-    plt.legend(fontsize=12, loc='upper left')
+    plt.plot(S_test, approx_l2, '--', label='L2 Regularization Approximation', lw=2)
+    plt.plot(S_test, approx_l1, '-.', label='L1 Regularization Approximation', lw=2)
+    plt.title("Regularization Methods Comparison", fontsize=9)
+    plt.xlabel("Underlying Asset Price", fontsize=8)
+    plt.ylabel("Payout", fontsize=8)
+    plt.legend(fontsize=8, loc='upper left')
     plt.grid(True, alpha=0.3)
+    plt.tick_params(labelsize=7)
     
-    # Сохраняем в TikZ
-    tikzplotlib.save("regularization_comparison.tex",
-                     axis_width="\\textwidth",
-                     axis_height="8cm",
-                     textsize=10)
+    # Save data for pgfplots
+    with open("../latex/regularization_comparison.dat", "w") as f:
+        f.write("# S target l2 l1\n")
+        for s, t, l2, l1 in zip(S_test, target_values, approx_l2, approx_l1):
+            f.write(f"{s:.6f} {t:.6f} {l2:.6f} {l1:.6f}\n")
+            
+    # Generate pgfplots tex file
+    with open("../latex/regularization_comparison.tex", "w") as f:
+        f.write(r"""\begin{tikzpicture}
+\begin{axis}[
+    width=0.9\textwidth,
+    height=6cm,
+    grid=both,
+    grid style={line width=.1pt, draw=gray!10},
+    major grid style={line width=.2pt,draw=gray!50},
+    xlabel style={font=\tiny},
+    ylabel style={font=\tiny},
+    tick label style={font=\tiny},
+    title style={font=\small},
+    legend style={font=\tiny, at={(0.02,0.98)}, anchor=north west},
+    xlabel={Underlying Asset Price},
+    ylabel={Payout},
+    title={Regularization Methods Comparison}
+]
+
+\addplot[thick, black] table[x index=0,y index=1] {regularization_comparison.dat};
+\addlegendentry{Target Payout}
+
+\addplot[thick, dashed, red] table[x index=0,y index=2] {regularization_comparison.dat};
+\addlegendentry{L2 Regularization Approximation}
+
+\addplot[thick, dashdotted, blue] table[x index=0,y index=3] {regularization_comparison.dat};
+\addlegendentry{L1 Regularization Approximation}
+
+\end{axis}
+\end{tikzpicture}
+""")
     
-    # Альтернативный вариант с настройкой стиля
-    tikzplotlib.clean_figure()
-    tikzplotlib.save("regularization_comparison.tex",
-                     extra_axis_parameters={
-                         "width=0.9\\textwidth",
-                         "height=6cm",
-                         "legend style={font=\\footnotesize}",
-                         "label style={font=\\small}",
-                         "tick label style={font=\\scriptsize}"
-                     })
+    # Also save PNG for quick preview
+    plt.savefig("../latex/regularization_comparison.png", dpi=300, bbox_inches='tight')
     
     # Print results summary
     print("L2 Weights:")
