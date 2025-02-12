@@ -76,7 +76,9 @@ underlying asset price \( S \). We construct an approximation using \( n \) call
 options and \( m \) put options with strike prices \( \{K_i\}_{i=1}^{n+m} \):
 
 \begin{equation}
-V(S) \approx \lambda S + \sum_{i=1}^{n} \alpha_i C(S, K_i) + \sum_{j=1}^{m} \beta_j P(S, K_j)
+V(S) \approx \lambda S + 
+    \sum_{i=1}^{n} \alpha_i C(S, K_i) + 
+    \sum_{j=1}^{m} \beta_j P(S, K_j)
 \end{equation}
 
 where \( \lambda \) represents the spot position, \( \alpha_i \) and \( \beta_j \) 
@@ -84,7 +86,10 @@ are option weights. The optimal weights are found by solving the regularized lea
 squares problem with either L2 (Ridge) or L1 (Lasso) regularization:
 
 \begin{equation}
-\min_{\boldsymbol{\theta}} \int_{S_{\min}}^{S_{\max}} \left[ V(S) - \hat{V}(S;\boldsymbol{\theta}) \right]^2 dS + \gamma \|\boldsymbol{\theta}\|_p^p
+\min_{\boldsymbol{\theta}} 
+    \int_{S_{\min}}^{S_{\max}} 
+        \left[ V(S) - \hat{V}(S;\boldsymbol{\theta}) \right]^2 dS + 
+    \gamma \|\boldsymbol{\theta}\|_p^p
 \end{equation}
 
 where \( \boldsymbol{\theta} = (\lambda, \{\alpha_i\}, \{\beta_j\}) \) represents
@@ -98,7 +103,10 @@ simplicity or transaction costs are important considerations.
 Discretizing the integral and using matrix notation, we solve:
 
 \begin{equation}
-\boldsymbol{\theta}^* = \argmin_{\boldsymbol{\theta}} \|\mathbf{A}\boldsymbol{\theta} - \mathbf{b}\|_2^2 + \gamma \|\boldsymbol{\theta}\|_p^p
+\boldsymbol{\theta}^* = 
+    \argmin_{\boldsymbol{\theta}} 
+        \|\mathbf{A}\boldsymbol{\theta} - \mathbf{b}\|_2^2 + 
+        \gamma \|\boldsymbol{\theta}\|_p^p
 \end{equation}
 
 where the design matrix \( \mathbf{A} \) contains option payoffs and spot positions
@@ -108,7 +116,9 @@ the vector of target payout values.
 \subsection{Numerical Implementation}
 The discrete optimization problem with L2 regularization has a closed-form solution:
 \begin{equation}
-\boldsymbol{\theta}^* = (\mathbf{A}^\top \mathbf{A} + \gamma \mathbf{I})^{-1} \mathbf{A}^\top \mathbf{b}
+\boldsymbol{\theta}^* = 
+    (\mathbf{A}^\top \mathbf{A} + \gamma \mathbf{I})^{-1} 
+    \mathbf{A}^\top \mathbf{b}
 \end{equation}
 
 where $\mathbf{A} \in \mathbb{R}^{N \times (n+m+1)}$ represents the matrix of basis 
@@ -148,14 +158,19 @@ The key advantage emerges when combining the approximation with distribution
 forecasts $\mathbb{P}(S_T)$:
  
 \begin{equation}
-\mathbb{E}[V(S_T)] = \int_{0}^{\infty} V(S) \mathbb{P}(S_T = S) dS
+\mathbb{E}[V(S_T)] = 
+    \int_{0}^{\infty} 
+        V(S) \mathbb{P}(S_T = S) dS
 \end{equation}
 
 Optimal portfolio weights $\boldsymbol{\theta}^*$ maximize the expected payout under 
 forecasted distribution:
 
 \begin{equation}
-\boldsymbol{\theta}^* = \argmax_{\boldsymbol{\theta}} \mathbb{E}\left[\hat{V}(S_T;\boldsymbol{\theta})\right] - \lambda \text{Var}\left(\hat{V}(S_T;\boldsymbol{\theta})\right)
+\boldsymbol{\theta}^* = 
+    \argmax_{\boldsymbol{\theta}} 
+        \mathbb{E}\left[\hat{V}(S_T;\boldsymbol{\theta})\right] - 
+        \lambda \text{Var}\left(\hat{V}(S_T;\boldsymbol{\theta})\right)
 \end{equation}
 
 where $\lambda$ represents risk aversion parameter.
