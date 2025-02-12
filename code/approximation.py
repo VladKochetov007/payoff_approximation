@@ -106,7 +106,7 @@ def example_usage():
     plt.plot(S_test, approx_l2, '--', label='L2 Regularization Approximation', lw=2)
     plt.plot(S_test, approx_l1, '-.', label='L1 Regularization Approximation', lw=2)
     plt.title("Regularization Methods Comparison", fontsize=9)
-    plt.xlabel("Underlying Asset Price", fontsize=8)
+    plt.xlabel("Underlying Asset Price at Maturity", fontsize=8)
     plt.ylabel("Payout", fontsize=8)
     plt.legend(fontsize=8, loc='upper left')
     plt.grid(True, alpha=0.3)
@@ -132,7 +132,7 @@ def example_usage():
     tick label style={font=\tiny},
     title style={font=\small},
     legend style={font=\tiny, at={(0.02,0.98)}, anchor=north west},
-    xlabel={Underlying Asset Price},
+    xlabel={Underlying Asset Price at Maturity},
     ylabel={Payout},
     title={Regularization Methods Comparison}
 ]

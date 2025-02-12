@@ -54,7 +54,6 @@ the effectiveness of this method in replicating complex payouts.
         Financial Derivatives,
         Computational Finance,
         Distribution Forecasts,
-        Portfolio Construction,
         Option Trading
     }
 }
@@ -112,6 +111,15 @@ The discrete optimization problem with L2 regularization has a closed-form solut
 
 where $\mathbf{A} \in \mathbb{R}^{N \times (n+m+1)}$ represents the matrix of basis payoffs, $\mathbf{b} \in \mathbb{R}^N$ contains target payoff values, $\gamma$ controls solution smoothness through regularization, and $\mathbf{I}$ denotes the identity matrix. Evaluation points $\{S_k\}$ are typically distributed around the current spot price to emphasize approximation accuracy in relevant price regions. The L1-regularized problem is solved using iterative optimization methods.
 
+\begin{figure}[htbp]
+\centering
+\input{regularization_comparison.tex}
+\caption{Comparison of L1 and L2 regularization}
+\label{fig:regularization}
+\end{figure}
+
+Figure~\ref{fig:regularization} demonstrates the effectiveness of both regularization approaches in approximating a complex payout profile. The target function combines linear, sinusoidal, and power-law segments, presenting a challenging test case. Both methods achieve good approximation quality, with L2 regularization providing slightly smoother results and L1 regularization favoring a sparser representation with fewer non-zero option weights.
+
 \section{Results}
 \subsection{Distribution-Based Trading}
 The approximation method enables novel trading strategies that exploit distributional forecasts rather than direct price predictions. Traders can hedge against forecasted distribution features, express views on higher moments of price distribution, and implement volatility surface arbitrage strategies through carefully constructed option portfolios.
@@ -129,13 +137,6 @@ Optimal portfolio weights $\boldsymbol{\theta}^*$ maximize the expected payout u
 \end{equation}
 
 where $\lambda$ represents risk aversion parameter.
-
-\begin{figure}[htbp]
-\centering
-\input{regularization_comparison.tex}
-\caption{Comparison of regularization methods using 9 strike prices.}
-\label{fig:regularization}
-\end{figure}
 
 \section{Conclusion}
 
