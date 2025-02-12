@@ -1,4 +1,4 @@
-.PHONY: all clean watch help
+.PHONY: all clean watch help demo
 
 TEX_DIR = latex
 BUILD_DIR = build
@@ -19,6 +19,17 @@ clean:
 watch:
 	latexmk -pdf -pvc -outdir=$(BUILD_DIR) $(TEX_DIR)/article.tex
 
+# Demo target - run code, build PDF and show
+demo:
+	@echo "Cleaning..."
+	@make clean
+	@echo "Running Python code..."
+	@cd code && python approximation.py
+	@echo "Building PDF..."
+	@make all
+	@echo "Opening PDF..."
+	@xdg-open $(BUILD_DIR)/article.pdf
+
 # Help target
 help:
 	@echo "Available targets:"
@@ -26,4 +37,5 @@ help:
 	@echo "  make all    - Build the PDF"
 	@echo "  make clean  - Remove all generated files"
 	@echo "  make watch  - Watch for changes and rebuild automatically"
+	@echo "  make demo   - Run Python code, build PDF and show result"
 	@echo "  make help   - Show this help message" 

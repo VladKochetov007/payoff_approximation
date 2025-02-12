@@ -1,12 +1,8 @@
 import numpy as np
-from scipy.optimize import minimize
 from typing import Callable, Tuple
-import matplotlib
-matplotlib.use('Agg')  # Добавить в начало файла
-import matplotlib.pyplot as plt
 from sklearn.linear_model import Lasso
 
-def create_basis_functions(strikes: list[float], spot: float) -> list[Callable[[float], float]]:
+def create_basis_functions(strikes: list[float]) -> list[Callable[[float], float]]:
     """Generate call/put payoff functions for given strikes"""
     basis = []
     for K in strikes:
@@ -42,7 +38,7 @@ def approximate_payout(
     S_values = np.linspace(0.5*spot, 1.5*spot, 100)
     
     # Create basis functions (calls/puts)
-    basis = create_basis_functions(strikes, spot)
+    basis = create_basis_functions(strikes)
     
     # Add spot position (lambda*S) to the basis
     basis.append(lambda S: S)  # Lambda term
@@ -88,30 +84,19 @@ def example_usage():
     strikes = [70, 80, 90, 100, 105, 110, 120, 130, 98]
     
     # Run approximation with tighter regularization
-    weights_l2, lambda_l2 = approximate_payout(target, strikes, spot=100, regularization=0.2, method='l2')
-    weights_l1, lambda_l1 = approximate_payout(target, strikes, spot=100, regularization=0.2, method='l1')
+    regularization = 0.05
+    weights_l2, lambda_l2 = approximate_payout(target, strikes, spot=100, regularization=regularization, method='l2')
+    weights_l1, lambda_l1 = approximate_payout(target, strikes, spot=100, regularization=regularization, method='l1')
     
     # Generate comparison data
     S_test = np.linspace(50, 150, 500)
     target_values = target(S_test)
     
-    # Calculate approximated payout
-    basis = create_basis_functions(strikes, spot=100)
+    # Calculate approxi mated payout
+    basis = create_basis_functions(strikes)
     approx_l2 = sum(w*f(S_test) for w, f in zip(weights_l2, basis)) + lambda_l2*S_test
     approx_l1 = sum(w*f(S_test) for w, f in zip(weights_l1, basis)) + lambda_l1*S_test
-    
-    # Create figure with improved styling
-    plt.figure(figsize=(14, 7))
-    plt.plot(S_test, target_values, 'k-', label='Target Payout', lw=3)
-    plt.plot(S_test, approx_l2, '--', label='L2 Regularization Approximation', lw=2)
-    plt.plot(S_test, approx_l1, '-.', label='L1 Regularization Approximation', lw=2)
-    plt.title("Regularization Methods Comparison", fontsize=9)
-    plt.xlabel("Underlying Asset Price at Maturity", fontsize=8)
-    plt.ylabel("Payout", fontsize=8)
-    plt.legend(fontsize=8, loc='upper left')
-    plt.grid(True, alpha=0.3)
-    plt.tick_params(labelsize=7)
-    
+
     # Save data for pgfplots
     with open("../latex/regularization_comparison.dat", "w") as f:
         f.write("# S target l2 l1\n")
@@ -141,18 +126,14 @@ def example_usage():
 \addlegendentry{Target Payout}
 
 \addplot[thick, dashed, red] table[x index=0,y index=2] {regularization_comparison.dat};
-\addlegendentry{L2 Regularization Approximation}
+\addlegendentry{L2 Regularization Approximation"""+f"({regularization:.2f})"+r"""}
 
 \addplot[thick, dashdotted, blue] table[x index=0,y index=3] {regularization_comparison.dat};
-\addlegendentry{L1 Regularization Approximation}
+\addlegendentry{L1 Regularization Approximation"""+f"({regularization:.2f})"+r"""}
 
 \end{axis}
 \end{tikzpicture}
 """)
-    
-    # Also save PNG for quick preview
-    plt.savefig("../latex/regularization_comparison.png", dpi=300, bbox_inches='tight')
-    
     # Print results summary
     print("L2 Weights:")
     for K, w_call, w_put in zip(strikes, weights_l2[::2], weights_l2[1::2]):
