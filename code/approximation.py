@@ -2,14 +2,20 @@ import numpy as np
 from typing import Callable, Tuple
 from sklearn.linear_model import Lasso
 
+
+USE_CALL_PUT_PARITY = False
+regularization = 0.1
+
 def create_basis_functions(strikes: list[float]) -> list[Callable[[float], float]]:
-    """Generate call/put payoff functions for given strikes"""
+    """Generate call payoff functions and spot position using put-call parity"""
     basis = []
     for K in strikes:
-        # Call option payoff: max(S - K, 0)
+        # Only call options needed (puts can be expressed via calls + spot)
         basis.append(lambda S, K=K: np.maximum(S - K, 0))
-        # Put option payoff: max(K - S, 0) 
-        basis.append(lambda S, K=K: np.maximum(K - S, 0))
+        if not USE_CALL_PUT_PARITY:
+            # Put option payoff: max(K - S, 0) 
+            basis.append(lambda S, K=K: np.maximum(K - S, 0))
+
     return basis
 
 def approximate_payout(
@@ -40,8 +46,9 @@ def approximate_payout(
     # Create basis functions (calls/puts)
     basis = create_basis_functions(strikes)
     
-    # Add spot position (lambda*S) to the basis
-    basis.append(lambda S: S)  # Lambda term
+    # Add spot position to the basis if using put-call parity
+    if USE_CALL_PUT_PARITY:
+        basis.append(lambda S: S)  # Spot position
     
     # Build design matrix
     A = np.array([[f(S) for f in basis] for S in S_values])
@@ -55,15 +62,19 @@ def approximate_payout(
             rcond=None
         )[0]
     elif method == 'l1':
-        # L1 регуляризация с использованием Lasso
+        # L1 regularization using Lasso
         model = Lasso(alpha=regularization, fit_intercept=False, max_iter=10000)
         model.fit(A, b)
         solution = model.coef_
     else:
         raise ValueError("Invalid method. Use 'l1' or 'l2'")
     
-    # Split solution into options weights and lambda
-    return solution[:-1], solution[-1]
+    if USE_CALL_PUT_PARITY:
+        # Split solution into options weights and lambda
+        return solution[:-1], solution[-1]
+    else:
+        # Return all weights and 0 for lambda since no spot position used
+        return solution, 0.0
 
 def example_usage():
     """Demonstrate approximation of complex payout structure"""
@@ -84,7 +95,6 @@ def example_usage():
     strikes = [70, 80, 90, 100, 105, 110, 120, 130, 98]
     
     # Run approximation with tighter regularization
-    regularization = 0.05
     weights_l2, lambda_l2 = approximate_payout(target, strikes, spot=100, regularization=regularization, method='l2')
     weights_l1, lambda_l1 = approximate_payout(target, strikes, spot=100, regularization=regularization, method='l1')
     
@@ -92,10 +102,15 @@ def example_usage():
     S_test = np.linspace(50, 150, 500)
     target_values = target(S_test)
     
-    # Calculate approxi mated payout
+    # Calculate approximated payout
     basis = create_basis_functions(strikes)
-    approx_l2 = sum(w*f(S_test) for w, f in zip(weights_l2, basis)) + lambda_l2*S_test
-    approx_l1 = sum(w*f(S_test) for w, f in zip(weights_l1, basis)) + lambda_l1*S_test
+    approx_l2 = sum(w*f(S_test) for w, f in zip(weights_l2, basis))
+    approx_l1 = sum(w*f(S_test) for w, f in zip(weights_l1, basis))
+    
+    # Add spot position if using put-call parity
+    if USE_CALL_PUT_PARITY:
+        approx_l2 += lambda_l2*S_test
+        approx_l1 += lambda_l1*S_test
 
     # Save data for pgfplots
     with open("../latex/regularization_comparison.dat", "w") as f:
@@ -126,22 +141,26 @@ def example_usage():
 \addlegendentry{Target Payout}
 
 \addplot[thick, dashed, red] table[x index=0,y index=2] {regularization_comparison.dat};
-\addlegendentry{L2 Regularization Approximation"""+f"({regularization:.2f})"+r"""}
+\addlegendentry{L2 Approximation"""+f"($\gamma={regularization:.2f}$)"+r"""}
 
 \addplot[thick, dashdotted, blue] table[x index=0,y index=3] {regularization_comparison.dat};
-\addlegendentry{L1 Regularization Approximation"""+f"({regularization:.2f})"+r"""}
+\addlegendentry{L1 Approximation"""+f"($\gamma={regularization:.2f}$)"+r"""}
 
 \end{axis}
 \end{tikzpicture}
 """)
     # Print results summary
     print("L2 Weights:")
-    for K, w_call, w_put in zip(strikes, weights_l2[::2], weights_l2[1::2]):
-        print(f"Strike {K:3.0f}: Call={w_call:+.3f}, Put={w_put:+.3f}")
+    for K, w_call in zip(strikes, weights_l2):
+        print(f"Strike {K:3.0f}: Call={w_call:+.3f}")
+    if USE_CALL_PUT_PARITY:
+        print(f"Spot position: {lambda_l2:.3f}")
     
     print("\nL1 Weights:")
-    for K, w_call, w_put in zip(strikes, weights_l1[::2], weights_l1[1::2]):
-        print(f"Strike {K:3.0f}: Call={w_call:+.3f}, Put={w_put:+.3f}")
+    for K, w_call in zip(strikes, weights_l1):
+        print(f"Strike {K:3.0f}: Call={w_call:+.3f}")
+    if USE_CALL_PUT_PARITY:
+        print(f"Spot position: {lambda_l1:.3f}")
 
 if __name__ == "__main__":
     example_usage()
