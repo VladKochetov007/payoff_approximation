@@ -16,16 +16,36 @@
 
 % Define keywords command
 \providecommand{\keywords}[1]{\textbf{Keywords:} #1}
-\title{\rule{\textwidth}{4pt}\\
+
+% Remove page number from the first page
+\usepackage{titling}
+\usepackage{geometry}
+
+% Adjust vertical spacing on title page
+\pretitle{\vspace*{\fill}\begin{center}}
+\posttitle{\end{center}\vspace*{\fill}}
+\preauthor{\begin{center}}
+\postauthor{\end{center}}
+\predate{\begin{center}}
+\postdate{\end{center}}
+
+\title{\rule{\textwidth}{4pt}\\[1em]
 \textbf{From Distribution Forecasts to Vanilla Portfolios: \\[0.2cm]
-Regularized Payout Approximation in Discrete Space}\\[0.2cm]
+Regularized Payout Approximation in Discrete Space}\\[1em]
 \rule{\textwidth}{2pt}}
+
 \author{\small \textbf{Vlad Kochetov} \\
     \small Faculty of Mechanics and Mathematics, \\
     \small Taras Shevchenko National University of Kyiv \\
     \small \texttt{vladkoch@knu.ua}
 }
 \date{\today}
+
+\begin{document}
+
+% Remove page number from the first page
+\thispagestyle{empty}
+
 
 \begin{document}
 
@@ -131,11 +151,7 @@ The L1-regularized problem is solved using iterative optimization methods.
 \begin{figure}[htbp]
 \centering
 \input{regularization_comparison.tex}
-\caption{Comparison of L1 and L2 regularization methods for approximating a complex 
-payout profile as a function of the underlying asset price at maturity. The target 
-payout (solid black) combines linear, sinusoidal, and power-law segments. Both L2 
-(dashed) and L1 (dash-dotted) regularization methods achieve good approximation 
-using 9 strike prices, with L1 producing a sparser portfolio.}
+\caption{Comparison of L1 and L2 regularization}
 \label{fig:regularization}
 \end{figure}
 
