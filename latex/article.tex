@@ -83,6 +83,16 @@ building blocks for such approximations. This paper introduces an approach to
 approximating arbitrary payout profiles using a combination of these options.
 
 \section{Literature Review}
+The theoretical foundations of option portfolio optimization were established by 
+\cite{Carr01012001}, who demonstrated the theoretical possibility of replicating 
+arbitrary payout functions through continuous strike spaces. While their approach 
+provides elegant closed-form solutions in continuous market settings, three fundamental 
+limitations hinder practical implementation: the discrete availability of strike prices 
+in real markets, liquidity constraints, non-negligible transaction costs scaling with 
+portfolio complexity, and numerical stability challenges in finite difference implementations. 
+Proposed method addresses these limitations through regularization techniques and 
+discrete optimization methods tailored for real-world trading environments, while 
+preserving the theoretical elegance of the original framework.
 
 \section{Methodology}
 \subsection{Model Assumptions}
