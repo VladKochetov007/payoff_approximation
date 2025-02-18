@@ -4,7 +4,7 @@
 \usepackage{amsfonts}
 \usepackage{amssymb}
 \usepackage{graphicx}
-\usepackage{cite}
+\usepackage{natbib}
 \usepackage{hyperref}
 \usepackage{setspace}
 \usepackage{pgfplots}
@@ -83,19 +83,51 @@ building blocks for such approximations. This paper introduces an approach to
 approximating arbitrary payout profiles using a combination of these options.
 
 \section{Literature Review}
-The theoretical foundations of option portfolio optimization were established by 
-\cite{Carr01012001}, who demonstrated the theoretical possibility of replicating 
-arbitrary payout functions through continuous strike spaces. While their approach 
-provides elegant closed-form solutions in continuous market settings, three fundamental 
-limitations hinder practical implementation: the discrete availability of strike prices 
+The theoretical foundations of option portfolio optimization were established in the work of 
+\citep{Carr01012001}, which demonstrated the theoretical possibility of replicating 
+arbitrary payout functions through continuous strike spaces. While this approach 
+provides elegant closed-form solutions in continuous market settings, several fundamental 
+limitations affect practical implementation: the discrete availability of strike prices 
 in real markets, liquidity constraints, non-negligible transaction costs scaling with 
 portfolio complexity, and numerical stability challenges in finite difference implementations. 
-Proposed method addresses these limitations through regularization techniques and 
+The proposed method addresses these limitations through regularization techniques and 
 discrete optimization methods tailored for real-world trading environments, while 
 preserving the theoretical elegance of the original framework.
 
 \section{Methodology}
 \subsection{Model Assumptions}
+The proposed approximation framework relies on several key assumptions:
+
+\begin{enumerate}
+    \item \textbf{Discrete Strike Space:} The model operates in a discrete strike price space 
+    $\{K_i\}_{i=1}^n$, reflecting real market conditions where options are available only 
+    at specific strikes.
+    
+    \item \textbf{Local Approximation Region:} The approximation focuses on a finite price 
+    interval around the current spot price $[S_{\min}, S_{\max}]$, where $S_{\min}$ and $S_{\max}$ 
+    are chosen to ensure sufficient coverage of the relevant price region.
+    
+    \item \textbf{European-Style Options:} The framework utilizes European-style vanilla 
+    options exclusively, avoiding the complexity of early exercise features present in 
+    American options.
+    
+    \item \textbf{Static Replication:} The model assumes a static replication approach, 
+    where the portfolio weights remain constant until maturity. Dynamic rebalancing effects 
+    are not considered in the basic framework.
+    
+    \item \textbf{Put-Call Parity Flexibility:} The implementation allows for two 
+    alternative approaches:
+    \begin{itemize}
+        \item Direct use of both calls and puts as separate instruments
+        \item Expressing puts through calls and spot positions using put-call parity
+    \end{itemize}
+    This flexibility enables optimization of the portfolio structure based on market 
+    conditions and transaction costs.
+\end{enumerate}
+
+The numerical implementation discretizes the approximation domain into a finite set of 
+evaluation points. The number of discretization points is chosen to balance computational 
+efficiency with approximation accuracy.
 
 \subsection{Mathematical Framework}
 Let \( V(S) \) represent the value of a target payout profile as a function of the 
@@ -200,7 +232,7 @@ where $\lambda$ represents risk aversion parameter.
 
 \section{Conclusion}
 
-\bibliographystyle{plain}
+\bibliographystyle{apalike}
 \bibliography{references}
 
 \end{document} 
