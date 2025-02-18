@@ -73,26 +73,26 @@ class DistributionToPayout:
             plt.savefig(save_path, dpi=150)
         plt.show()
 
-# Обновлённый пример использования
+# Updated usage example
 if __name__ == "__main__":
-    # Параметры смеси гауссианов
+    # Gaussian mixture parameters
     def gaussian_mixture(x, mu1=1.0, sigma1=0.5, mu2=3.0, sigma2=0.8, weight=0.3):
         return (weight * np.exp(-(x-mu1)**2/(2*sigma1**2)) / (sigma1*np.sqrt(2*np.pi)) 
                 + (1-weight) * np.exp(-(x-mu2)**2/(2*sigma2**2)) / (sigma2*np.sqrt(2*np.pi)))
 
-    # Создаем распределение на основе смеси гауссианов
+    # Create distribution based on Gaussian mixture
     price_bins = np.linspace(-0.1, 5.0, 101)
     bin_centers = (price_bins[1:] + price_bins[:-1])/2
     probs = gaussian_mixture(bin_centers)
-    probs /= probs.sum()  # Нормализуем
+    probs /= probs.sum()  # Normalize
     
-    # Инициализируем преобразователь
+    # Initialize converter
     converter = DistributionToPayout(price_bins, probs)
     
-    # Визуализация
+    # Visualization
     converter.plot_distribution(save_path="gaussian_mixture_payout.png")
     
-    # Тестируем функцию
+    # Test function
     test_prices = [0.5, 1.0, 2.0, 3.0, 4.0]
     for price in test_prices:
         print(f"Payout at {price:.2f}%: {converter.get_payout_function()(price):.4f}")
