@@ -12,17 +12,14 @@
     legend style={font=\tiny, at={(0.02,0.98)}, anchor=north west},
     xlabel={Underlying Asset Price at Maturity},
     ylabel={Payoff},
-    title={L1 and L2 Regularization Comparison}
+    title={Weighted Error Method Comparison}
 ]
 
-\addplot[thick, black] table[x index=0,y index=1] {regularization_comparison.dat};
+\addplot[thick, black] table[x index=0,y index=1] {weighted_loss.dat};
 \addlegendentry{Target Payoff}
 
-\addplot[thick, dashed, red] table[x index=0,y index=2] {regularization_comparison.dat};
-\addlegendentry{L2 Approximation ($\gamma=0.10$)}
-
-\addplot[thick, dashdotted, blue] table[x index=0,y index=3] {regularization_comparison.dat};
-\addlegendentry{L1 Approximation ($\gamma=0.10$)}
+\addplot[thick, dotted, green!50!black] table[x index=0,y index=2] {weighted_loss.dat};
+\addlegendentry{Weighted Error ($\gamma=0.10$)}
 
 \end{axis}
 \end{tikzpicture}

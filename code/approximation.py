@@ -1,6 +1,7 @@
 import numpy as np
 from typing import Callable, Tuple
 from sklearn.linear_model import Lasso
+from scipy.optimize import minimize
 
 
 USE_CALL_PUT_PARITY = False
@@ -18,6 +19,25 @@ def create_basis_functions(strikes: list[float]) -> list[Callable[[float], float
 
     return basis
 
+def weighted_error_objective(weights: np.ndarray, A: np.ndarray, b: np.ndarray, gamma: float) -> float:
+    """
+    Compute weighted error objective function
+    
+    Args:
+        weights: Current solution vector
+        A: Design matrix
+        b: Target values
+        gamma: Regularization parameter
+        
+    Returns:
+        Weighted error value
+    """
+    pred = A @ weights
+    error = np.abs(pred - b)
+    weighted_error = np.sum(np.abs(b) * error)
+    regularization = gamma * np.sum(np.abs(weights))
+    return weighted_error + regularization
+
 def approximate_payoff(
     target_payoff: Callable[[float], float],
     strikes: list[float],
@@ -32,8 +52,8 @@ def approximate_payoff(
         target_payoff: Function of S (spot price) to approximate
         strikes: Available strike prices
         spot: Current spot price
-        regularization: L2 regularization parameter
-        method: Method of regularization ('l2' or 'l1')
+        regularization: Regularization parameter
+        method: Method of regularization ('l2', 'l1', or 'weighted')
         
     Returns:
         Tuple (weights, lambda) where:
@@ -66,8 +86,19 @@ def approximate_payoff(
         model = Lasso(alpha=regularization, fit_intercept=False, max_iter=10000)
         model.fit(A, b)
         solution = model.coef_
+    elif method == 'weighted':
+        # Weighted error optimization
+        x0 = np.zeros(A.shape[1])
+        result = minimize(
+            weighted_error_objective,
+            x0,
+            args=(A, b, regularization),
+            method='SLSQP',
+            options={'maxiter': 1000}
+        )
+        solution = result.x
     else:
-        raise ValueError("Invalid method. Use 'l1' or 'l2'")
+        raise ValueError("Invalid method. Use 'l1', 'l2', or 'weighted'")
     
     if USE_CALL_PUT_PARITY:
         # Split solution into options weights and lambda
@@ -97,6 +128,7 @@ def example_usage():
     # Run approximation with tighter regularization
     weights_l2, lambda_l2 = approximate_payoff(target, strikes, spot=100, regularization=regularization, method='l2')
     weights_l1, lambda_l1 = approximate_payoff(target, strikes, spot=100, regularization=regularization, method='l1')
+    weights_weighted, lambda_weighted = approximate_payoff(target, strikes, spot=100, regularization=regularization, method='weighted')
     
     # Generate comparison data
     S_test = np.linspace(50, 150, 500)
@@ -106,19 +138,27 @@ def example_usage():
     basis = create_basis_functions(strikes)
     approx_l2 = sum(w*f(S_test) for w, f in zip(weights_l2, basis))
     approx_l1 = sum(w*f(S_test) for w, f in zip(weights_l1, basis))
+    approx_weighted = sum(w*f(S_test) for w, f in zip(weights_weighted, basis))
     
     # Add spot position if using put-call parity
     if USE_CALL_PUT_PARITY:
         approx_l2 += lambda_l2*S_test
         approx_l1 += lambda_l1*S_test
+        approx_weighted += lambda_weighted*S_test
 
-    # Save data for pgfplots
+    # Save data for L1/L2 comparison
     with open("../latex/regularization_comparison.dat", "w") as f:
         f.write("# S target l2 l1\n")
         for s, t, l2, l1 in zip(S_test, target_values, approx_l2, approx_l1):
             f.write(f"{s:.6f} {t:.6f} {l2:.6f} {l1:.6f}\n")
             
-    # Generate pgfplots tex file
+    # Save data for weighted method comparison
+    with open("../latex/weighted_loss.dat", "w") as f:
+        f.write("# S target weighted\n")
+        for s, t, w in zip(S_test, target_values, approx_weighted):
+            f.write(f"{s:.6f} {t:.6f} {w:.6f}\n")
+            
+    # Generate L1/L2 comparison plot
     with open("../latex/regularization_comparison.tex", "w") as f:
         f.write(r"""\begin{tikzpicture}
 \begin{axis}[
@@ -134,21 +174,51 @@ def example_usage():
     legend style={font=\tiny, at={(0.02,0.98)}, anchor=north west},
     xlabel={Underlying Asset Price at Maturity},
     ylabel={Payoff},
-    title={Regularization Methods Comparison}
+    title={L1 and L2 Regularization Comparison}
 ]
 
 \addplot[thick, black] table[x index=0,y index=1] {regularization_comparison.dat};
 \addlegendentry{Target Payoff}
 
 \addplot[thick, dashed, red] table[x index=0,y index=2] {regularization_comparison.dat};
-\addlegendentry{L2 Approximation"""+f"($\gamma={regularization:.2f}$)"+r"""}
+\addlegendentry{L2 Approximation ($\gamma="""+f"{regularization:.2f}"+r"""$)}
 
 \addplot[thick, dashdotted, blue] table[x index=0,y index=3] {regularization_comparison.dat};
-\addlegendentry{L1 Approximation"""+f"($\gamma={regularization:.2f}$)"+r"""}
+\addlegendentry{L1 Approximation ($\gamma="""+f"{regularization:.2f}"+r"""$)}
 
 \end{axis}
 \end{tikzpicture}
 """)
+
+    # Generate weighted method comparison plot
+    with open("../latex/weighted_loss.tex", "w") as f:
+        f.write(r"""\begin{tikzpicture}
+\begin{axis}[
+    width=0.9\textwidth,
+    height=6cm,
+    grid=both,
+    grid style={line width=.1pt, draw=gray!10},
+    major grid style={line width=.2pt,draw=gray!50},
+    xlabel style={font=\tiny},
+    ylabel style={font=\tiny},
+    tick label style={font=\tiny},
+    title style={font=\small},
+    legend style={font=\tiny, at={(0.02,0.98)}, anchor=north west},
+    xlabel={Underlying Asset Price at Maturity},
+    ylabel={Payoff},
+    title={Weighted Error Method Comparison}
+]
+
+\addplot[thick, black] table[x index=0,y index=1] {weighted_loss.dat};
+\addlegendentry{Target Payoff}
+
+\addplot[thick, dotted, green!50!black] table[x index=0,y index=2] {weighted_loss.dat};
+\addlegendentry{Weighted Error ($\gamma="""+f"{regularization:.2f}"+r"""$)}
+
+\end{axis}
+\end{tikzpicture}
+""")
+
     # Print results summary
     print("L2 Weights:")
     for K, w_call in zip(strikes, weights_l2):
@@ -161,6 +231,12 @@ def example_usage():
         print(f"Strike {K:3.0f}: Call={w_call:+.3f}")
     if USE_CALL_PUT_PARITY:
         print(f"Spot position: {lambda_l1:.3f}")
+        
+    print("\nWeighted Error Weights:")
+    for K, w_call in zip(strikes, weights_weighted):
+        print(f"Strike {K:3.0f}: Call={w_call:+.3f}")
+    if USE_CALL_PUT_PARITY:
+        print(f"Spot position: {lambda_weighted:.3f}")
 
 if __name__ == "__main__":
     example_usage()

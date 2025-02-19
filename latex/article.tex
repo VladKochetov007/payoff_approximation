@@ -262,6 +262,19 @@ methods achieve good approximation quality, with L2 regularization providing sli
 smoother results and L1 regularization favoring a sparser representation with fewer 
 non-zero option weights.
 
+\begin{figure}[htbp]
+\centering
+\input{weighted_loss.tex}
+\caption{Weighted Error Method Performance}
+\label{fig:weighted}
+\end{figure}
+
+Figure~\ref{fig:weighted} illustrates the performance of the weighted error method, 
+which places greater emphasis on accurately approximating regions with larger payoff 
+values. This approach is particularly useful when the economic significance of errors 
+varies with the magnitude of the target payoff, providing a more practical solution 
+for trading applications.
+
 \section{Results}
 \subsection{Distribution-Based Trading}
 The approximation method enables novel trading strategies that exploit distributional 
