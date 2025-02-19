@@ -257,6 +257,13 @@ and L1 regularization favors a sparser representation with fewer non-zero option
 \label{fig:regularization}
 \end{figure}
 
+\input{method_comparison.tex}
+
+Table~\ref{tab:method_comparison} presents a comparative analysis of the three regularization 
+methods across different regularization parameters ($\gamma$). The Mean Absolute Error (MAE) 
+is used as the primary metric for comparison, providing a direct measure of approximation accuracy 
+in absolute terms. Lower MAE values indicate better approximation quality.
+
 \begin{figure}[htbp]
 \centering
 \input{weighted_loss.tex}
@@ -266,13 +273,7 @@ emphasizing the approximation quality where it matters most for trading applicat
 \label{fig:weighted}
 \end{figure}
 
-\input{method_comparison.tex}
-
-Table~\ref{tab:method_comparison} presents a comparative analysis of the three regularization 
-methods across different regularization parameters ($\gamma$). The Mean Absolute Error (MAE) 
-is used as the primary metric for comparison, providing a direct measure of approximation accuracy 
-in absolute terms. Lower MAE values indicate better approximation quality.
-
+\vspace{1em}
 The results demonstrate that:
 \begin{itemize}
     \item While L2 regularization provides an analytical solution and shows consistent performance 
