@@ -188,9 +188,16 @@ squares problem with L2 (Ridge) regularization:
 
 where \( \boldsymbol{\theta} = (\lambda, \{\alpha_i\}, \{\beta_j\}) \) represents
 the position weights, \( \gamma \) is the regularization parameter, and 
-\( S_{\min}, S_{\max} \) define the approximation domain. The L2 norm promotes 
-smoother weight distributions, providing stability to the solution.
+\( S_{\min}, S_{\max} \) define the approximation domain.
 
+\begin{figure}[htbp]
+\centering
+\input{regularization_comparison.tex}
+\caption{Comparison of L1 and L2 regularization}
+\label{fig:regularization}
+\end{figure}
+
+The L2 norm promotes smoother weight distributions, providing stability to the solution.
 Discretizing the integral and using matrix notation, we obtain:
 
 \begin{equation}
@@ -234,33 +241,7 @@ formulations may better reflect trading objectives. Two notable generalizations 
                 V(S) \Big| V(S) - \hat{V}(S;\boldsymbol{\theta}) \Big| dS + 
             \gamma \|\boldsymbol{\theta}\|_p^p
     \end{equation}
-    This formulation provides error weighting proportional to the target payoff magnitude, 
-    offering economic interpretation well-aligned with trading objectives. Furthermore, it 
-    naturally enhances focus on regions with significant payoff values, making it particularly 
-    suitable for practical applications.
 \end{enumerate}
-
-However, these generalizations lose the analytical tractability of the L2 case, 
-requiring numerical optimization methods for solution.
-
-\subsection{Numerical Implementation}
-The implementation leverages the analytical solution derived in the Mathematical Framework 
-section for L2-regularized problems. For L1 regularization and alternative loss functions, 
-numerical optimization methods are employed.
-
-\begin{figure}[htbp]
-\centering
-\input{regularization_comparison.tex}
-\caption{Comparison of L1 and L2 regularization}
-\label{fig:regularization}
-\end{figure}
-
-Figure~\ref{fig:regularization} demonstrates the effectiveness of both regularization 
-approaches in approximating a complex payoff profile. The target function combines 
-different types of functions, presenting a challenging test case. Both 
-methods achieve good approximation quality, with L2 regularization providing slightly 
-smoother results and L1 regularization favoring a sparser representation with fewer 
-non-zero option weights.
 
 \begin{figure}[htbp]
 \centering
@@ -269,11 +250,10 @@ non-zero option weights.
 \label{fig:weighted}
 \end{figure}
 
-Figure~\ref{fig:weighted} illustrates the performance of the weighted error method, 
-which places greater emphasis on accurately approximating regions with larger payoff 
-values. This approach is particularly useful when the economic significance of errors 
-varies with the magnitude of the target payoff, providing a more practical solution 
-for trading applications.
+The weighted error formulation provides error weighting proportional to the target payoff magnitude, 
+offering economic interpretation well-aligned with trading objectives. Furthermore, it 
+naturally enhances focus on regions with significant payoff values, making it particularly 
+suitable for practical applications.
 
 \input{method_comparison.tex}
 
@@ -288,9 +268,7 @@ increases, with MAE growing from 1.45 to 4.62.
 This comprehensive comparison suggests that for practical applications, the weighted error 
 method should be preferred despite its requirement for numerical optimization. The improved 
 accuracy (approximately 30\% reduction in MAE compared to L2) and consistent performance 
-across different regularization parameters justify the additional computational cost. 
-Furthermore, the weighted method's focus on economically significant regions makes it 
-particularly well-suited for real-world trading applications.
+across different regularization parameters justify the additional computational cost.
 
 \section{Results}
 \subsection{Distribution-Based Trading}
@@ -315,7 +293,7 @@ forecasted distribution:
 \begin{equation}
 \boldsymbol{\theta}^* = 
     \argmax_{\boldsymbol{\theta}} 
-        \mathbb{E}\left[\hat{V}(S_T;\boldsymbol{\theta})\right] - 
+        \mathbb{E}\left[\hat{V}(S_T;\boldsymbol{\theta})\right]
 \end{equation}
 
 \section{Conclusion}
