@@ -89,7 +89,7 @@ def example_usage():
                               0.8*(120 - S)**1.5,
                               0)
                     )
-        )
+        ) + 15
     
     # Available strikes (limited set)
     strikes = [70, 80, 90, 100, 105, 110, 120, 130, 98]
