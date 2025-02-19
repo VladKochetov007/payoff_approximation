@@ -115,14 +115,12 @@ The proposed approximation framework relies on several key assumptions:
     where the portfolio weights remain constant until maturity. Dynamic rebalancing effects 
     are not considered in the basic framework.
     
-    \item \textbf{Put-Call Parity Flexibility:} The implementation allows for two 
-    alternative approaches:
-    \begin{itemize}
-        \item Direct use of both calls and puts as separate instruments
-        \item Expressing puts through calls and spot positions using put-call parity
-    \end{itemize}
+    \item \textbf{Put-Call Parity Flexibility:} The implementation supports both direct 
+    use of calls and puts as separate instruments, as well as expressing puts through 
+    calls and spot positions using put-call parity. This approach provides flexibility 
+    in portfolio construction while maintaining mathematical equivalence.
     This flexibility enables optimization of the portfolio structure based on market 
-    conditions and transaction costs.
+    conditions.
 \end{enumerate}
 
 The numerical implementation discretizes the approximation domain into a finite set of 
@@ -142,50 +140,76 @@ V(S) \approx \lambda S +
 
 where \( \lambda \) represents the spot position, \( \alpha_i \) and \( \beta_j \) 
 are option weights. The optimal weights are found by solving the regularized least 
-squares problem with either L2 (Ridge) or L1 (Lasso) regularization:
+squares problem with L2 (Ridge) regularization:
 
 \begin{equation}
 \min_{\boldsymbol{\theta}} 
     \int_{S_{\min}}^{S_{\max}} 
         \left[ V(S) - \hat{V}(S;\boldsymbol{\theta}) \right]^2 dS + 
-    \gamma \|\boldsymbol{\theta}\|_p^p
+    \gamma \|\boldsymbol{\theta}\|_2^2
 \end{equation}
 
 where \( \boldsymbol{\theta} = (\lambda, \{\alpha_i\}, \{\beta_j\}) \) represents
-the position weights, \( \gamma \) is the regularization parameter, 
-\( S_{\min}, S_{\max} \) define the approximation domain, and \( p \) determines
-the type of regularization. The L2 norm (\(p=2\)) promotes smoother weight 
-distributions, while the L1 norm (\(p=1\)) tends to produce sparse solutions by 
-setting some weights exactly to zero, which can be beneficial when portfolio 
-simplicity is important consideration.
+the position weights, \( \gamma \) is the regularization parameter, and 
+\( S_{\min}, S_{\max} \) define the approximation domain. The L2 norm promotes 
+smoother weight distributions, providing stability to the solution.
 
-Discretizing the integral and using matrix notation, we solve:
+Discretizing the integral and using matrix notation, we obtain:
 
 \begin{equation}
 \boldsymbol{\theta}^* = 
     \argmin_{\boldsymbol{\theta}} 
         \|\mathbf{A}\boldsymbol{\theta} - \mathbf{b}\|_2^2 + 
-        \gamma \|\boldsymbol{\theta}\|_p^p
+        \gamma \|\boldsymbol{\theta}\|_2^2
 \end{equation}
 
 where the design matrix \( \mathbf{A} \) contains option payoffs and spot positions
 evaluated at discrete price points \( \{S_k\}_{k=1}^N \), and \( \mathbf{b} \) is
 the vector of target payout values.
 
-\subsection{Numerical Implementation}
-The discrete optimization problem with L2 regularization has a closed-form solution:
+This quadratic optimization problem admits an analytical solution:
 \begin{equation}
 \boldsymbol{\theta}^* = 
     (\mathbf{A}^\top \mathbf{A} + \gamma \mathbf{I})^{-1} 
     \mathbf{A}^\top \mathbf{b}
 \end{equation}
 
-where $\mathbf{A} \in \mathbb{R}^{N \times (n+m+1)}$ represents the matrix of basis 
-payoffs, $\mathbf{b} \in \mathbb{R}^N$ contains target payoff values, $\gamma$ 
-controls solution smoothness through regularization, and $\mathbf{I}$ denotes the 
-identity matrix. Evaluation points $\{S_k\}$ are typically distributed around the 
-current spot price to emphasize approximation accuracy in relevant price regions. 
-The L1-regularized problem is solved using iterative optimization methods.
+\subsection{Alternative Loss Functions}
+While the standard L2 loss function provides analytical tractability, alternative 
+formulations may better reflect trading objectives. Two notable generalizations are:
+
+\begin{enumerate}
+    \item \textbf{L1 Regularization (Lasso):} Replacing L2 regularization term with L1 norm:
+    \begin{equation}
+        L(\boldsymbol{\theta}) = 
+            \int_{S_{\min}}^{S_{\max}} 
+                \left[ V(S) - \hat{V}(S;\boldsymbol{\theta}) \right]^2 dS + 
+            \gamma \|\boldsymbol{\theta}\|_1
+    \end{equation}
+    This formulation tends to produce sparse solutions by setting some weights exactly 
+    to zero, which can be beneficial when portfolio simplicity is important consideration.
+
+    \item \textbf{Weighted Error Function:} Incorporating target function magnitude 
+    into the error term:
+    \begin{equation}
+        L(\boldsymbol{\theta}) = 
+            \int_{S_{\min}}^{S_{\max}} 
+                V(S) \Big| V(S) - \hat{V}(S;\boldsymbol{\theta}) \Big| dS + 
+            \gamma \|\boldsymbol{\theta}\|_p^p
+    \end{equation}
+    This formulation provides error weighting proportional to the target payout magnitude, 
+    offering economic interpretation well-aligned with trading objectives. Furthermore, it 
+    naturally enhances focus on regions with significant payout values, making it particularly 
+    suitable for practical applications.
+\end{enumerate}
+
+However, these generalizations lose the analytical tractability of the L2 case, 
+requiring numerical optimization methods for solution.
+
+\subsection{Numerical Implementation}
+The implementation leverages the analytical solution derived in the Mathematical Framework 
+section for L2-regularized problems. For L1 regularization and alternative loss functions, 
+numerical optimization methods are employed.
 
 \begin{figure}[htbp]
 \centering
