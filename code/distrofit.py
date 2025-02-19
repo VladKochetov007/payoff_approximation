@@ -3,105 +3,101 @@ from typing import Callable
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
-class DistributionToPayout:
+class DistributionToPayoff:
     """
-    Converts probability distribution forecast to payout function
+    Converts probability distribution forecast to payoff function
     
-    Parameters:
-        bins (np.ndarray): Array of bin edges (N+1 elements)
-        probabilities (np.ndarray): Probability for each bin (N elements)
-        payout_scale (float): Scaling factor for payout amounts
+    Args:
+        price_bins (list[float]): List of price bin edges
+        probabilities (list[float]): Probability for each bin
+        payoff_scale (float): Scaling factor for payoff amounts
     """
+    
     def __init__(
         self,
-        bins: np.ndarray,
-        probabilities: np.ndarray,
-        payout_scale: float = 100.0
+        price_bins: list[float],
+        probabilities: list[float],
+        payoff_scale: float = 100.0
     ):
-        self.bins = bins
+        self.price_bins = price_bins
         self.probabilities = probabilities
-        self.payout_scale = payout_scale
+        self.payoff_scale = payoff_scale
         
-        # Validate inputs
-        assert len(bins) == len(probabilities) + 1, "Invalid bins-probabilities shape"
-        assert np.isclose(probabilities.sum(), 1.0), "Probabilities must sum to 1"
+        if len(price_bins) != len(probabilities) + 1:
+            raise ValueError("Length of price_bins must be one more than probabilities")
+    
+    def get_payoff_function(self) -> Callable[[float], float]:
+        """Create piecewise constant payoff function"""
         
-    def get_payout_function(self) -> Callable[[float], float]:
-        """Create piecewise constant payout function"""
-        # Calculate midpoints for each bin
-        midpoints = (self.bins[1:] + self.bins[:-1]) / 2
+        # Ensure probabilities sum to 1
+        self.probabilities = np.array(self.probabilities) / sum(self.probabilities)
         
-        # Calculate payout weights: inverse probability weighting
-        weights = self.payout_scale * (1 / (self.probabilities + 1e-8))
+        # Calculate payoff weights: inverse probability weighting
+        weights = self.payoff_scale * (1 / (self.probabilities + 1e-8))
         
-        # Normalize weights to [0, 1] range
-        weights /= weights.max()
+        # Create piecewise constant function
+        bins = self.price_bins
         
-        def payout(S: float) -> float:
-            # Find bin index for given price
-            bin_idx = np.searchsorted(self.bins, S, side='right') - 1
-            if 0 <= bin_idx < len(weights):
-                return weights[bin_idx] * self.probabilities[bin_idx]
-            return 0.0  # Out of range
-            
-        return payout
-
+        def payoff(S: float) -> float:
+            for i, (lower, upper) in enumerate(zip(bins[:-1], bins[1:])):
+                if lower <= S < upper:
+                    return weights[i]
+            return 0.0
+        
+        return payoff
+    
     def plot_distribution(self):
-        """Visualize probability distribution and payout function in browser"""
-        # Create figure with secondary y-axis
-        fig = make_subplots(rows=2, cols=1, shared_xaxes=True)
+        """Visualize probability distribution and payoff function in browser"""
         
-        # Bin centers and widths
-        centers = (self.bins[1:] + self.bins[:-1]) / 2
+        # Create figure with secondary y-axis
+        fig = make_subplots(rows=2, cols=1)
         
         # Plot probability distribution
+        bin_centers = [(a + b)/2 for a, b in zip(self.price_bins[:-1], self.price_bins[1:])]
         fig.add_trace(
-            go.Bar(x=centers, y=self.probabilities, name="Probability Distribution"),
+            go.Bar(x=bin_centers, y=self.probabilities, name="Probability Distribution"),
             row=1, col=1
         )
         
-        # Plot payout function
-        S = np.linspace(self.bins[0], self.bins[-1], 1000)
-        payouts = [self.get_payout_function()(x) for x in S]
+        # Plot payoff function
+        S = np.linspace(min(self.price_bins), max(self.price_bins), 1000)
+        payoffs = [self.get_payoff_function()(x) for x in S]
         fig.add_trace(
-            go.Scatter(x=S, y=payouts, name="Payout Function", line=dict(color='red', width=2)),
+            go.Scatter(x=S, y=payoffs, name="Payoff Function", line=dict(color='red', width=2)),
             row=2, col=1
         )
         
         # Update layout
         fig.update_layout(
-            title_text="Distribution and Payout Function",
+            title_text="Distribution and Payoff Function",
             showlegend=True,
             height=800
         )
         
-        # Update axes labels
-        fig.update_xaxes(title_text="Price Change (%)", row=2, col=1)
-        fig.update_yaxes(title_text="Probability Density", row=1, col=1)
-        fig.update_yaxes(title_text="Payout", row=2, col=1)
+        fig.update_xaxes(title_text="Price", row=1, col=1)
+        fig.update_xaxes(title_text="Price", row=2, col=1)
+        fig.update_yaxes(title_text="Probability", row=1, col=1)
+        fig.update_yaxes(title_text="Payoff", row=2, col=1)
         
         fig.show()
 
-# Example usage
-if __name__ == "__main__":
-    # Gaussian mixture parameters
-    def gaussian_mixture(x, mu1=1.0, sigma1=0.5, mu2=3.0, sigma2=0.8, weight=0.3):
-        return (weight * np.exp(-(x-mu1)**2/(2*sigma1**2)) / (sigma1*np.sqrt(2*np.pi)) 
-                + (1-weight) * np.exp(-(x-mu2)**2/(2*sigma2**2)) / (sigma2*np.sqrt(2*np.pi)))
-
-    # Create distribution based on Gaussian mixture
-    price_bins = np.linspace(-0.1, 5.0, 101)
-    bin_centers = (price_bins[1:] + price_bins[:-1])/2
-    probs = gaussian_mixture(bin_centers)
-    probs /= probs.sum()  # Normalize
+def example_usage():
+    # Create example distribution (mixture of two Gaussians)
+    x = np.linspace(80, 120, 41)
+    dist1 = stats.norm.pdf(x, loc=95, scale=3)
+    dist2 = stats.norm.pdf(x, loc=105, scale=4)
+    probs = 0.4*dist1 + 0.6*dist2
+    probs = probs / sum(probs)  # normalize
     
-    # Initialize converter
-    converter = DistributionToPayout(price_bins, probs)
+    # Convert to payoff function
+    converter = DistributionToPayoff(x, probs)
     
-    # Visualization (will open in browser)
+    # Visualize
     converter.plot_distribution()
     
-    # Test function
-    test_prices = [0.5, 1.0, 2.0, 3.0, 4.0]
-    for price in test_prices:
-        print(f"Payout at {price:.2f}%: {converter.get_payout_function()(price):.4f}")
+    # Test some values
+    for price in [90, 95, 100, 105, 110]:
+        print(f"Payoff at {price:.2f}%: {converter.get_payoff_function()(price):.4f}")
+
+if __name__ == "__main__":
+    example_usage()

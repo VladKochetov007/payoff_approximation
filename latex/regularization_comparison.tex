@@ -11,12 +11,12 @@
     title style={font=\small},
     legend style={font=\tiny, at={(0.02,0.98)}, anchor=north west},
     xlabel={Underlying Asset Price at Maturity},
-    ylabel={Payout},
+    ylabel={Payoff},
     title={Regularization Methods Comparison}
 ]
 
 \addplot[thick, black] table[x index=0,y index=1] {regularization_comparison.dat};
-\addlegendentry{Target Payout}
+\addlegendentry{Target Payoff}
 
 \addplot[thick, dashed, red] table[x index=0,y index=2] {regularization_comparison.dat};
 \addlegendentry{L2 Approximation($\gamma=0.10$)}

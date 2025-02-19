@@ -1,13 +1,13 @@
-# Payout Approximation Research
+# Payoff Approximation Research
 
 > ⚠️ **Note**: This research paper is currently under active development.
 
-This repository contains source code and LaTeX files for a research paper on approximating complex payout profiles using vanilla options with regularization techniques.
+This repository contains source code and LaTeX files for a research paper on approximating complex payoff profiles using vanilla options with regularization techniques.
 
 ## Project Structure
 
 - `code/` - Python implementation
-  - `approximation.py` - Core implementation of regularized payout approximation
+  - `approximation.py` - Core implementation of regularized payoff approximation
 - `latex/` - LaTeX source files
   - `article.tex` - Main paper source
   - `references.bib` - Bibliography
@@ -15,7 +15,7 @@ This repository contains source code and LaTeX files for a research paper on app
 
 ## Features
 
-- Implementation of L1 and L2 regularized payout approximation
+- Implementation of L1 and L2 regularized payoff approximation
 - Comparison of different regularization methods
 - Automatic generation of TikZ plots
 - Integration of Python computations with LaTeX document
@@ -44,7 +44,7 @@ make help   # Show all available commands
 @misc{
     Kochetov2025,
     author   = {Kochetov, Vlad},
-    title    = {From Distribution Forecasts to Vanilla Portfolios: Regularized Payout Approximation in Discrete Space},
+    title    = {From Distribution Forecasts to Vanilla Portfolios: Regularized Payoff Approximation in Discrete Space},
   year     = {2025},
 }
 ```

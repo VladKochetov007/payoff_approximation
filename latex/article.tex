@@ -31,7 +31,7 @@
 
 \title{\rule{\textwidth}{4pt}\\[1em]
 \textbf{From Distribution Forecasts to Vanilla Portfolios: \\[0.2cm]
-Regularized Payout Approximation in Discrete Space}\\[1em]
+Regularized Payoff Approximation in Discrete Space}\\[1em]
 \rule{\textwidth}{2pt}}
 
 \author{\small \textbf{Vlad Kochetov} \\
@@ -49,12 +49,12 @@ Regularized Payout Approximation in Discrete Space}\\[1em]
 \maketitle
 
 \begin{abstract}
-This paper explores the methodology for approximating complex payout profiles using a
+This paper explores the methodology for approximating complex payoff profiles using a
 combination of vanilla European options. The mathematical framework is presented that
-allows for the decomposition of arbitrary payout structures into a series of call and
+allows for the decomposition of arbitrary payoff structures into a series of call and
 put options with varying strike prices. The approach is validated through numerical
 examples and practical applications in financial engineering. The results demonstrate
-the effectiveness of this method in replicating complex payouts.
+the effectiveness of this method in replicating complex payoffs.
 \end{abstract}
 
 \newpage
@@ -62,7 +62,7 @@ the effectiveness of this method in replicating complex payouts.
 \keywords{
     \small{
         Vanilla Options, 
-        Payout Profile, 
+        Payoff Profile, 
         Financial Engineering, 
         Option Pricing, 
         Approximation, 
@@ -80,12 +80,12 @@ The ability to replicate complex financial instruments using simpler, more liqui
 derivatives is a cornerstone of modern financial engineering. Vanilla European 
 options, due to their simplicity and widespread availability, serve as ideal 
 building blocks for such approximations. This paper introduces an approach to 
-approximating arbitrary payout profiles using a combination of these options.
+approximating arbitrary payoff profiles using a combination of these options.
 
 \section{Literature Review}
 The theoretical foundations of option portfolio optimization were established in the work of 
 \citep{Carr01012001}, which demonstrated the theoretical possibility of replicating 
-arbitrary payout functions through continuous strike spaces. While this approach 
+arbitrary payoff functions through continuous strike spaces. While this approach 
 provides elegant closed-form solutions in continuous market settings, several fundamental 
 limitations affect practical implementation: the discrete availability of strike prices 
 in real markets, liquidity constraints, non-negligible transaction costs scaling with 
@@ -128,7 +128,7 @@ evaluation points. The number of discretization points is chosen to balance comp
 efficiency with approximation accuracy.
 
 \subsection{Mathematical Framework}
-Let \( V(S) \) represent the value of a target payout profile as a function of the 
+Let \( V(S) \) represent the value of a target payoff profile as a function of the 
 underlying asset price \( S \). We construct an approximation using \( n \) call 
 options and \( m \) put options with strike prices \( \{K_i\}_{i=1}^{n+m} \):
 
@@ -165,7 +165,7 @@ Discretizing the integral and using matrix notation, we obtain:
 
 where the design matrix \( \mathbf{A} \) contains option payoffs and spot positions
 evaluated at discrete price points \( \{S_k\}_{k=1}^N \), and \( \mathbf{b} \) is
-the vector of target payout values.
+the vector of target payoff values.
 
 This quadratic optimization problem admits an analytical solution:
 \begin{equation}
@@ -197,9 +197,9 @@ formulations may better reflect trading objectives. Two notable generalizations 
                 V(S) \Big| V(S) - \hat{V}(S;\boldsymbol{\theta}) \Big| dS + 
             \gamma \|\boldsymbol{\theta}\|_p^p
     \end{equation}
-    This formulation provides error weighting proportional to the target payout magnitude, 
+    This formulation provides error weighting proportional to the target payoff magnitude, 
     offering economic interpretation well-aligned with trading objectives. Furthermore, it 
-    naturally enhances focus on regions with significant payout values, making it particularly 
+    naturally enhances focus on regions with significant payoff values, making it particularly 
     suitable for practical applications.
 \end{enumerate}
 
@@ -219,7 +219,7 @@ numerical optimization methods are employed.
 \end{figure}
 
 Figure~\ref{fig:regularization} demonstrates the effectiveness of both regularization 
-approaches in approximating a complex payout profile. The target function combines 
+approaches in approximating a complex payoff profile. The target function combines 
 different types of functions, presenting a challenging test case. Both 
 methods achieve good approximation quality, with L2 regularization providing slightly 
 smoother results and L1 regularization favoring a sparser representation with fewer 
@@ -242,7 +242,7 @@ forecasts $\mathbb{P}(S_T)$:
         V(S) \mathbb{P}(S_T = S) dS
 \end{equation}
 
-Optimal portfolio weights $\boldsymbol{\theta}^*$ maximize the expected payout under 
+Optimal portfolio weights $\boldsymbol{\theta}^*$ maximize the expected payoff under 
 forecasted distribution:
 
 \begin{equation}

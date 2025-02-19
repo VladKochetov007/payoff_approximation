@@ -18,18 +18,18 @@ def create_basis_functions(strikes: list[float]) -> list[Callable[[float], float
 
     return basis
 
-def approximate_payout(
-    target_payout: Callable[[float], float],
+def approximate_payoff(
+    target_payoff: Callable[[float], float],
     strikes: list[float],
     spot: float,
     regularization: float = 0.05,
     method: str = 'l2'
 ) -> Tuple[np.ndarray, float]:
     """
-    Approximate target payout using vanilla options
+    Approximate target payoff using vanilla options
     
     Args:
-        target_payout: Function of S (spot price) to approximate
+        target_payoff: Function of S (spot price) to approximate
         strikes: Available strike prices
         spot: Current spot price
         regularization: L2 regularization parameter
@@ -52,7 +52,7 @@ def approximate_payout(
     
     # Build design matrix
     A = np.array([[f(S) for f in basis] for S in S_values])
-    b = np.array([target_payout(S) for S in S_values])
+    b = np.array([target_payoff(S) for S in S_values])
     
     if method == 'l2':
         # Solve regularized least squares
@@ -77,8 +77,8 @@ def approximate_payout(
         return solution, 0.0
 
 def example_usage():
-    """Demonstrate approximation of complex payout structure"""
-    # Define complex target payout function
+    """Demonstrate approximation of complex payoff structure"""
+    # Define complex target payoff function
     def target(S):
         return np.where(
             S < 80,
@@ -95,14 +95,14 @@ def example_usage():
     strikes = [70, 80, 90, 100, 105, 110, 120, 130, 98]
     
     # Run approximation with tighter regularization
-    weights_l2, lambda_l2 = approximate_payout(target, strikes, spot=100, regularization=regularization, method='l2')
-    weights_l1, lambda_l1 = approximate_payout(target, strikes, spot=100, regularization=regularization, method='l1')
+    weights_l2, lambda_l2 = approximate_payoff(target, strikes, spot=100, regularization=regularization, method='l2')
+    weights_l1, lambda_l1 = approximate_payoff(target, strikes, spot=100, regularization=regularization, method='l1')
     
     # Generate comparison data
     S_test = np.linspace(50, 150, 500)
     target_values = target(S_test)
     
-    # Calculate approximated payout
+    # Calculate approximated payoff
     basis = create_basis_functions(strikes)
     approx_l2 = sum(w*f(S_test) for w, f in zip(weights_l2, basis))
     approx_l1 = sum(w*f(S_test) for w, f in zip(weights_l1, basis))
@@ -133,12 +133,12 @@ def example_usage():
     title style={font=\small},
     legend style={font=\tiny, at={(0.02,0.98)}, anchor=north west},
     xlabel={Underlying Asset Price at Maturity},
-    ylabel={Payout},
+    ylabel={Payoff},
     title={Regularization Methods Comparison}
 ]
 
 \addplot[thick, black] table[x index=0,y index=1] {regularization_comparison.dat};
-\addlegendentry{Target Payout}
+\addlegendentry{Target Payoff}
 
 \addplot[thick, dashed, red] table[x index=0,y index=2] {regularization_comparison.dat};
 \addlegendentry{L2 Approximation"""+f"($\gamma={regularization:.2f}$)"+r"""}
