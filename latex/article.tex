@@ -90,14 +90,14 @@ particularly in the form of heavy tails and higher moments that cannot be captur
 parametric models. This mismatch between theoretical assumptions and market reality can lead to
 systematic pricing errors and risk underestimation.
 
-Presented approach addresses these limitations by embracing the stochastic nature of markets
+The presented approach addresses these limitations by embracing the stochastic nature of markets
 without imposing restrictive distributional assumptions. Instead of attempting to fit
-market behavior into predetermined probability distributions as in \citep{Kuang2023}, 
-this paper proposes a framework that can accommodate any empirically observed distribution. This 
-distribution-free modeling approach acknowledges the complex, non-Gaussian nature of 
-market price movements, which often exhibit fat tails and asymmetric behavior. It allows 
-for direct incorporation of empirical distribution forecasts, enabling more accurate risk 
-assessment and pricing.
+market behavior into predetermined probability distributions as in \citep{Kuang2023} and 
+\citep{Li2023}, this paper proposes a framework that can accommodate any empirically 
+observed distribution. This distribution-free modeling approach acknowledges the complex, 
+non-Gaussian nature of market price movements, which often exhibit fat tails and 
+asymmetric behavior. It allows for direct incorporation of empirical distribution forecasts, 
+enabling more accurate risk assessment and pricing.
 Furthermore, the framework provides a flexible mechanism for extracting value from market
 inefficiencies without relying on specific distributional assumptions, while being able
 to adapt to changing market conditions and regime shifts that affect the shape of price
@@ -117,6 +117,16 @@ provides elegant closed-form solutions in continuous market settings, several fu
 limitations affect practical implementation: the discrete availability of strike prices 
 in real markets, liquidity constraints, non-negligible transaction costs scaling with 
 portfolio complexity, and numerical stability challenges in finite difference implementations. 
+
+The idea of modeling complete distributions rather than point estimates was inspired by recent 
+advances in time series forecasting, particularly the work of \citep{ansari2024chronos}, which 
+demonstrated the effectiveness of distribution-based predictions in capturing complex temporal 
+patterns. While tail risk hedging has been a fundamental concept since \citep{BlackScholes1973}, 
+where options were primarily used for downside protection, our approach extends this by 
+considering the entire distribution shape in portfolio construction. Unlike traditional methods 
+that focus solely on tail events, we propose a comprehensive framework that models and exploits 
+the complete probability distribution of asset returns.
+
 The proposed method addresses these limitations through regularization techniques and 
 discrete optimization methods tailored for real-world trading environments, while 
 preserving the theoretical elegance of the original framework.
