@@ -118,9 +118,9 @@ def approximate_payoff(
         # Return all weights and 0 for lambda since no spot position used
         return solution, 0.0
 
-def calculate_mape(y_true: np.ndarray, y_pred: np.ndarray) -> float:
-    """Calculate Mean Absolute Percentage Error"""
-    return np.mean(np.abs((y_true - y_pred) / y_true)) * 100
+def calculate_mae(y_true: np.ndarray, y_pred: np.ndarray) -> float:
+    """Calculate Mean Absolute Error"""
+    return np.mean(np.abs(y_true - y_pred))
 
 def generate_comparison_table(
     target_payoff: Callable[[float], float],
@@ -153,27 +153,35 @@ def generate_comparison_table(
             approx_l1 += lambda_l1*S_test
             approx_weighted += lambda_weighted*S_test
         
-        # Calculate MAPE for each method
-        mape_l2 = calculate_mape(target_values, approx_l2)
-        mape_l1 = calculate_mape(target_values, approx_l1)
-        mape_weighted = calculate_mape(target_values, approx_weighted)
+        # Calculate MAE for each method
+        mae_l2 = calculate_mae(target_values, approx_l2)
+        mae_l1 = calculate_mae(target_values, approx_l1)
+        mae_weighted = calculate_mae(target_values, approx_weighted)
         
-        results.append((reg, mape_l2, mape_l1, mape_weighted))
+        results.append((reg, mae_l2, mae_l1, mae_weighted))
     
     # Generate LaTeX table
     method_comp_tex = os.path.join(LATEX_DIR, "method_comparison.tex")
     with open(method_comp_tex, "w") as f:
         f.write(r"""\begin{table}[htbp]
 \centering
-\caption{Performance Comparison of Different Regularization Methods}
+\caption{Performance Comparison of Different Regularization Methods (MAE)}
 \label{tab:method_comparison}
 \begin{tabular}{cccc}
 \hline
-$\gamma$ & L2 MAPE (\%) & L1 MAPE (\%) & Weighted MAPE (\%) \\
+$\gamma$ & L2 & L1 & Weighted \\
 \hline
 """)
-        for reg, mape_l2, mape_l1, mape_weighted in results:
-            f.write(f"{reg:.3f} & {mape_l2:.2f} & {mape_l1:.2f} & {mape_weighted:.2f} \\\\\n")
+        for reg, mae_l2, mae_l1, mae_weighted in results:
+            # Find the best (minimum) MAE for this row
+            min_mae = min(mae_l2, mae_l1, mae_weighted)
+            
+            # Format each value, making the best one bold
+            l2_str = f"\\textbf{{{mae_l2:.2f}}}" if mae_l2 == min_mae else f"{mae_l2:.2f}"
+            l1_str = f"\\textbf{{{mae_l1:.2f}}}" if mae_l1 == min_mae else f"{mae_l1:.2f}"
+            weighted_str = f"\\textbf{{{mae_weighted:.2f}}}" if mae_weighted == min_mae else f"{mae_weighted:.2f}"
+            
+            f.write(f"{reg:.3f} & {l2_str} & {l1_str} & {weighted_str} \\\\\n")
         
         f.write(r"""\hline
 \end{tabular}
@@ -302,24 +310,24 @@ def example_usage():
     # Print results summary
     print("L2 Weights:")
     for K, w_call in zip(strikes, weights_l2):
-        print(f"Strike {K:3.0f}: Call={w_call:+.3f}")
+        print(f"Strike {K:3.0f}: Call={w_call:+.2f}")
     if USE_CALL_PUT_PARITY:
-        print(f"Spot position: {lambda_l2:.3f}")
+        print(f"Spot position: {lambda_l2:.2f}")
     
     print("\nL1 Weights:")
     for K, w_call in zip(strikes, weights_l1):
-        print(f"Strike {K:3.0f}: Call={w_call:+.3f}")
+        print(f"Strike {K:3.0f}: Call={w_call:+.2f}")
     if USE_CALL_PUT_PARITY:
-        print(f"Spot position: {lambda_l1:.3f}")
+        print(f"Spot position: {lambda_l1:.2f}")
         
     print("\nWeighted Error Weights:")
     for K, w_call in zip(strikes, weights_weighted):
-        print(f"Strike {K:3.0f}: Call={w_call:+.3f}")
+        print(f"Strike {K:3.0f}: Call={w_call:+.2f}")
     if USE_CALL_PUT_PARITY:
-        print(f"Spot position: {lambda_weighted:.3f}")
+        print(f"Spot position: {lambda_weighted:.2f}")
         
     # Generate comparison table for different regularization values
-    regularization_values = [0.01, 0.05, 0.1, 0.5, 1.0]
+    regularization_values = [0.01, 0.05, 0.1, 0.5, 10]
     generate_comparison_table(target, strikes, spot=100, regularization_values=regularization_values)
 
 if __name__ == "__main__":
