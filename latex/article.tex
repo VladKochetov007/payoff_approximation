@@ -304,6 +304,23 @@ forecasted distribution:
 
 where $\lambda$ represents risk aversion parameter.
 
+\input{method_comparison.tex}
+
+Table~\ref{tab:method_comparison} presents a comparative analysis of the three regularization 
+methods across different regularization parameters ($\gamma$). The Mean Absolute Percentage 
+Error (MAPE) is used as the primary metric for comparison, providing a scale-independent 
+measure of approximation accuracy. Lower MAPE values indicate better approximation quality.
+
+The results demonstrate that:
+\begin{itemize}
+    \item L2 regularization provides consistent performance across different $\gamma$ values,
+    showing good stability in the approximation.
+    \item L1 regularization achieves comparable accuracy while promoting sparser solutions,
+    which can be advantageous for portfolio implementation.
+    \item The weighted error method shows improved accuracy in regions with larger payoff
+    values, as reflected in its MAPE scores, particularly for moderate regularization values.
+\end{itemize}
+
 \section{Conclusion}
 
 \bibliographystyle{apalike}

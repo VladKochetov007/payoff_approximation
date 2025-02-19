@@ -2,10 +2,21 @@ import numpy as np
 from typing import Callable, Tuple
 from sklearn.linear_model import Lasso
 from scipy.optimize import minimize
+import os
 
 
 USE_CALL_PUT_PARITY = False
 regularization = 0.1
+
+# Define paths
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+LATEX_DIR = os.path.join(BASE_DIR, "latex")
+
+def ensure_dir(file_path):
+    """Create directory if it doesn't exist"""
+    directory = os.path.dirname(file_path)
+    if not os.path.exists(directory):
+        os.makedirs(directory)
 
 def create_basis_functions(strikes: list[float]) -> list[Callable[[float], float]]:
     """Generate call payoff functions and spot position using put-call parity"""
@@ -107,6 +118,68 @@ def approximate_payoff(
         # Return all weights and 0 for lambda since no spot position used
         return solution, 0.0
 
+def calculate_mape(y_true: np.ndarray, y_pred: np.ndarray) -> float:
+    """Calculate Mean Absolute Percentage Error"""
+    return np.mean(np.abs((y_true - y_pred) / y_true)) * 100
+
+def generate_comparison_table(
+    target_payoff: Callable[[float], float],
+    strikes: list[float],
+    spot: float,
+    regularization_values: list[float]
+) -> None:
+    """Generate performance comparison table for different regularization values"""
+    # Generate evaluation points
+    S_test = np.linspace(50, 150, 500)
+    target_values = target_payoff(S_test)
+    
+    # Initialize results storage
+    results = []
+    
+    for reg in regularization_values:
+        # Calculate approximations for each method
+        weights_l2, lambda_l2 = approximate_payoff(target_payoff, strikes, spot, reg, 'l2')
+        weights_l1, lambda_l1 = approximate_payoff(target_payoff, strikes, spot, reg, 'l1')
+        weights_weighted, lambda_weighted = approximate_payoff(target_payoff, strikes, spot, reg, 'weighted')
+        
+        # Calculate approximated values
+        basis = create_basis_functions(strikes)
+        approx_l2 = sum(w*f(S_test) for w, f in zip(weights_l2, basis))
+        approx_l1 = sum(w*f(S_test) for w, f in zip(weights_l1, basis))
+        approx_weighted = sum(w*f(S_test) for w, f in zip(weights_weighted, basis))
+        
+        if USE_CALL_PUT_PARITY:
+            approx_l2 += lambda_l2*S_test
+            approx_l1 += lambda_l1*S_test
+            approx_weighted += lambda_weighted*S_test
+        
+        # Calculate MAPE for each method
+        mape_l2 = calculate_mape(target_values, approx_l2)
+        mape_l1 = calculate_mape(target_values, approx_l1)
+        mape_weighted = calculate_mape(target_values, approx_weighted)
+        
+        results.append((reg, mape_l2, mape_l1, mape_weighted))
+    
+    # Generate LaTeX table
+    method_comp_tex = os.path.join(LATEX_DIR, "method_comparison.tex")
+    with open(method_comp_tex, "w") as f:
+        f.write(r"""\begin{table}[htbp]
+\centering
+\caption{Performance Comparison of Different Regularization Methods}
+\label{tab:method_comparison}
+\begin{tabular}{cccc}
+\hline
+$\gamma$ & L2 MAPE (\%) & L1 MAPE (\%) & Weighted MAPE (\%) \\
+\hline
+""")
+        for reg, mape_l2, mape_l1, mape_weighted in results:
+            f.write(f"{reg:.3f} & {mape_l2:.2f} & {mape_l1:.2f} & {mape_weighted:.2f} \\\\\n")
+        
+        f.write(r"""\hline
+\end{tabular}
+\end{table}
+""")
+
 def example_usage():
     """Demonstrate approximation of complex payoff structure"""
     # Define complex target payoff function
@@ -146,20 +219,26 @@ def example_usage():
         approx_l1 += lambda_l1*S_test
         approx_weighted += lambda_weighted*S_test
 
+    # Ensure latex directory exists
+    os.makedirs(LATEX_DIR, exist_ok=True)
+
     # Save data for L1/L2 comparison
-    with open("../latex/regularization_comparison.dat", "w") as f:
+    reg_comp_dat = os.path.join(LATEX_DIR, "regularization_comparison.dat")
+    with open(reg_comp_dat, "w") as f:
         f.write("# S target l2 l1\n")
         for s, t, l2, l1 in zip(S_test, target_values, approx_l2, approx_l1):
             f.write(f"{s:.6f} {t:.6f} {l2:.6f} {l1:.6f}\n")
             
     # Save data for weighted method comparison
-    with open("../latex/weighted_loss.dat", "w") as f:
+    weighted_dat = os.path.join(LATEX_DIR, "weighted_loss.dat")
+    with open(weighted_dat, "w") as f:
         f.write("# S target weighted\n")
         for s, t, w in zip(S_test, target_values, approx_weighted):
             f.write(f"{s:.6f} {t:.6f} {w:.6f}\n")
             
     # Generate L1/L2 comparison plot
-    with open("../latex/regularization_comparison.tex", "w") as f:
+    reg_comp_tex = os.path.join(LATEX_DIR, "regularization_comparison.tex")
+    with open(reg_comp_tex, "w") as f:
         f.write(r"""\begin{tikzpicture}
 \begin{axis}[
     width=0.9\textwidth,
@@ -191,7 +270,8 @@ def example_usage():
 """)
 
     # Generate weighted method comparison plot
-    with open("../latex/weighted_loss.tex", "w") as f:
+    weighted_tex = os.path.join(LATEX_DIR, "weighted_loss.tex")
+    with open(weighted_tex, "w") as f:
         f.write(r"""\begin{tikzpicture}
 \begin{axis}[
     width=0.9\textwidth,
@@ -237,6 +317,10 @@ def example_usage():
         print(f"Strike {K:3.0f}: Call={w_call:+.3f}")
     if USE_CALL_PUT_PARITY:
         print(f"Spot position: {lambda_weighted:.3f}")
+        
+    # Generate comparison table for different regularization values
+    regularization_values = [0.01, 0.05, 0.1, 0.5, 1.0]
+    generate_comparison_table(target, strikes, spot=100, regularization_values=regularization_values)
 
 if __name__ == "__main__":
     example_usage()
