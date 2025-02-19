@@ -52,9 +52,12 @@ Regularized Payoff Approximation in Discrete Space}\\[1em]
 This paper explores the methodology for approximating complex payoff profiles using a
 combination of vanilla European options. The mathematical framework is presented that
 allows for the decomposition of arbitrary payoff structures into a series of call and
-put options with varying strike prices. The approach is validated through numerical
-examples and practical applications in financial engineering. The results demonstrate
-the effectiveness of this method in replicating complex payoffs.
+put options with varying strike prices. A key innovation is making the target payoff
+directly proportional to the estimated probability density function of the underlying
+asset price at expiration. The approach is validated through numerical examples and
+practical applications in financial engineering. The results demonstrate the effectiveness
+of this method in replicating complex payoffs while capturing the expected price
+distribution.
 \end{abstract}
 
 \newpage
@@ -79,8 +82,10 @@ the effectiveness of this method in replicating complex payoffs.
 The ability to replicate complex financial instruments using simpler, more liquid
 derivatives is a cornerstone of modern financial engineering. Vanilla European 
 options, due to their simplicity and widespread availability, serve as ideal 
-building blocks for such approximations. This paper introduces an approach to 
-approximating arbitrary payoff profiles using a combination of these options.
+building blocks for such approximations. This paper introduces an innovative approach 
+to approximating arbitrary payoff profiles using a combination of these options, where 
+the target payoff is designed to be directly proportional to the estimated probability 
+density function (PDF) of the underlying asset price at expiration.
 
 The traditional approach to financial modeling often relies heavily on assumptions about
 the underlying price distribution, with the normal distribution being the most common choice
@@ -91,23 +96,25 @@ parametric models. This mismatch between theoretical assumptions and market real
 systematic pricing errors and risk underestimation.
 
 The presented approach addresses these limitations by embracing the stochastic nature of markets
-without imposing restrictive distributional assumptions. Instead of attempting to fit
-market behavior into predetermined probability distributions as in \citep{Kuang2023} and 
-\citep{Li2023}, this paper proposes a framework that can accommodate any empirically 
-observed distribution. This distribution-free modeling approach acknowledges the complex, 
-non-Gaussian nature of market price movements, which often exhibit fat tails and 
-asymmetric behavior. It allows for direct incorporation of empirical distribution forecasts, 
-enabling more accurate risk assessment and pricing.
+and explicitly incorporating the estimated price distribution into the payoff structure. Instead 
+of attempting to fit market behavior into predetermined probability distributions as in 
+\citep{Kuang2023} and \citep{Li2023}, this paper proposes a framework that constructs payoff 
+profiles directly proportional to the empirically observed or forecasted price distribution. 
+This distribution-driven modeling approach acknowledges the complex, non-Gaussian nature of 
+market price movements, which often exhibit fat tails and asymmetric behavior. By making the 
+payoff proportional to the estimated PDF, the framework naturally adapts to the expected price 
+dynamics, providing enhanced risk-adjusted returns when the distribution forecast is accurate.
+
 Furthermore, the framework provides a flexible mechanism for extracting value from market
-inefficiencies without relying on specific distributional assumptions, while being able
-to adapt to changing market conditions and regime shifts that affect the shape of price
+inefficiencies by aligning portfolio returns with predicted price distributions, while being 
+able to adapt to changing market conditions and regime shifts that affect the shape of price
 distributions.
 
 The proposed methodology bridges the gap between theoretical option pricing models
 and observed market behavior by providing a practical framework for implementing
-distribution-based trading strategies. By focusing on distribution forecasting
-rather than point predictions, traders can develop more robust strategies that
-account for the full spectrum of possible market outcomes.
+distribution-based trading strategies. By focusing on distribution-proportional payoffs
+rather than arbitrary target functions, traders can develop more robust strategies that
+directly leverage their distributional views of market outcomes.
 
 \section{Literature Review}
 The theoretical foundations of option portfolio optimization were established in the work of 
@@ -121,11 +128,14 @@ portfolio complexity, and numerical stability challenges in finite difference im
 The idea of modeling complete distributions rather than point estimates was inspired by recent 
 advances in time series forecasting, particularly the work of \citep{ansari2024chronos}, which 
 demonstrated the effectiveness of distribution-based predictions in capturing complex temporal 
-patterns. While tail risk hedging has been a fundamental concept since \citep{BlackScholes1973}, 
-where options were primarily used for downside protection, our approach extends this by 
-considering the entire distribution shape in portfolio construction. Unlike traditional methods 
-that focus solely on tail events, we propose a comprehensive framework that models and exploits 
-the complete probability distribution of asset returns.
+patterns. Our innovation lies in making the target payoff directly proportional to these 
+predicted distributions, creating a natural alignment between market views and portfolio returns. 
+While tail risk hedging has been a fundamental concept since \citep{BlackScholes1973}, where 
+options were primarily used for downside protection, our approach extends this by considering 
+the entire distribution shape in portfolio construction. Unlike traditional methods that focus 
+solely on tail events, we propose a comprehensive framework that models and exploits the 
+complete probability distribution of asset returns by making payoffs proportional to the 
+estimated PDF.
 
 The proposed method addresses these limitations through regularization techniques and 
 discrete optimization methods tailored for real-world trading environments, while 
@@ -158,6 +168,10 @@ The proposed approximation framework relies on several key assumptions:
     in portfolio construction while maintaining mathematical equivalence.
     This flexibility enables optimization of the portfolio structure based on market 
     conditions.
+    
+    \item \textbf{Distribution-Proportional Payoff:} The target payoff function is set to be
+    directly proportional to the estimated probability density function of the underlying
+    asset price at expiration, i.e., $V(S) \propto f(S)$ where $f(S)$ is the estimated PDF.
 \end{enumerate}
 
 The numerical implementation discretizes the approximation domain into a finite set of 
@@ -165,12 +179,13 @@ evaluation points. The number of discretization points is chosen to balance comp
 efficiency with approximation accuracy.
 
 \subsection{Mathematical Framework}
-Let \( V(S) \) represent the value of a target payoff profile as a function of the 
-underlying asset price \( S \). We construct an approximation using \( n \) call 
-options and \( m \) put options with strike prices \( \{K_i\}_{i=1}^{n+m} \):
+Let \( f(S) \) represent the estimated probability density function of the underlying asset
+price at expiration, and let \( V(S) = k f(S) \) be the target payoff profile, where \( k \)
+is a scaling constant. We construct an approximation using \( n \) call options and \( m \) 
+put options with strike prices \( \{K_i\}_{i=1}^{n+m} \):
 
 \begin{equation}
-V(S) \approx \lambda S + 
+k f(S) \approx \lambda S + 
     \sum_{i=1}^{n} \alpha_i C(S, K_i) + 
     \sum_{j=1}^{m} \beta_j P(S, K_j)
 \end{equation}
@@ -182,7 +197,7 @@ squares problem with L2 (Ridge) regularization:
 \begin{equation}
 \min_{\boldsymbol{\theta}} 
     \int_{S_{\min}}^{S_{\max}} 
-        \left[ V(S) - \hat{V}(S;\boldsymbol{\theta}) \right]^2 dS + 
+        \left[ k f(S) - \hat{V}(S;\boldsymbol{\theta}) \right]^2 dS + 
     \gamma \|\boldsymbol{\theta}\|_2^2
 \end{equation}
 
@@ -202,7 +217,7 @@ Discretizing the integral and using matrix notation, we obtain:
 
 where the design matrix \( \mathbf{A} \) contains option payoffs and spot positions
 evaluated at discrete price points \( \{S_k\}_{k=1}^N \), and \( \mathbf{b} \) is
-the vector of target payoff values.
+the vector of target payoff values proportional to the estimated PDF.
 
 This quadratic optimization problem admits an analytical solution:
 \begin{equation}
@@ -220,7 +235,7 @@ formulations may better reflect trading objectives. Two notable generalizations 
     \begin{equation}
         L(\boldsymbol{\theta}) = 
             \int_{S_{\min}}^{S_{\max}} 
-                \left[ V(S) - \hat{V}(S;\boldsymbol{\theta}) \right]^2 dS + 
+                \left[ k f(S) - \hat{V}(S;\boldsymbol{\theta}) \right]^2 dS + 
             \gamma \|\boldsymbol{\theta}\|_1
     \end{equation}
     This formulation tends to produce sparse solutions by setting some weights exactly 
@@ -231,12 +246,12 @@ formulations may better reflect trading objectives. Two notable generalizations 
     \begin{equation}
         L(\boldsymbol{\theta}) = 
             \int_{S_{\min}}^{S_{\max}} 
-                V(S) \Big| V(S) - \hat{V}(S;\boldsymbol{\theta}) \Big| dS + 
+                k f(S) \Big| k f(S) - \hat{V}(S;\boldsymbol{\theta}) \Big| dS + 
             \gamma \|\boldsymbol{\theta}\|_p^p
     \end{equation}
     This formulation provides error weighting proportional to the target payoff magnitude, 
     offering economic interpretation well-aligned with trading objectives. Furthermore, it 
-    naturally enhances focus on regions with significant payoff values, making it particularly 
+    naturally enhances focus on regions with significant probability mass, making it particularly 
     suitable for practical applications.
 \end{enumerate}
 
@@ -251,9 +266,10 @@ numerical optimization methods are employed.
 \begin{figure}[htbp]
 \centering
 \input{regularization_comparison.tex}
-\caption{Comparison of L1 and L2 regularization methods in approximating a complex payoff profile. 
-While both methods achieve reasonable approximation quality, L2 regularization provides smoother results 
-and L1 regularization favors a sparser representation with fewer non-zero option weights.}
+\caption{Comparison of L1 and L2 regularization methods in approximating a PDF-proportional 
+payoff profile. While both methods achieve reasonable approximation quality, L2 regularization 
+provides smoother results and L1 regularization favors a sparser representation with fewer 
+non-zero option weights.}
 \label{fig:regularization}
 \end{figure}
 
@@ -268,8 +284,9 @@ in absolute terms. Lower MAE values indicate better approximation quality.
 \centering
 \input{weighted_loss.tex}
 \caption{Performance of the weighted error method, demonstrating superior accuracy in regions 
-with larger payoff values. This approach provides more economically meaningful results by 
-emphasizing the approximation quality where it matters most for trading applications.}
+with larger probability mass. This approach provides more economically meaningful results by 
+emphasizing the approximation quality where the underlying asset price is most likely to be 
+at expiration.}
 \label{fig:weighted}
 \end{figure}
 
@@ -282,26 +299,50 @@ The results demonstrate that:
     sparser solutions, but its performance deteriorates significantly as regularization increases.
     \item The weighted error method consistently outperforms both L1 and L2 approaches, maintaining 
     superior accuracy (MAE ~1.04) across all tested regularization values. This makes it the most 
-    suitable choice for real-world trading applications, where accuracy in high-payoff regions is 
-    crucial for portfolio performance.
+    suitable choice for real-world trading applications, where accuracy in high-probability regions 
+    is crucial for portfolio performance.
 \end{itemize}
 
 Despite the mathematical elegance and analytical tractability of the L2 approach, the empirical 
 results strongly suggest that the weighted error method is more appropriate for practical 
-implementation. Its ability to focus on economically significant regions and maintain consistent 
-performance across different regularization parameters makes it the preferred choice for 
+implementation. Its ability to focus on regions with significant probability mass and maintain 
+consistent performance across different regularization parameters makes it the preferred choice for 
 real-world trading applications.
 
 \section{Conclusion}
-This paper presents a comprehensive framework for approximating complex payoff profiles using vanilla European options in discrete strike spaces. The methodology addresses several practical challenges in financial engineering while maintaining mathematical rigor and computational efficiency. The developed framework operates in discrete strike spaces, directly reflecting real market conditions and constraints that practitioners face in implementation.
+This paper presents a comprehensive framework for approximating PDF-proportional payoff profiles 
+using vanilla European options in discrete strike spaces. The methodology addresses several 
+practical challenges in financial engineering while maintaining mathematical rigor and 
+computational efficiency. The developed framework operates in discrete strike spaces, directly 
+reflecting real market conditions and constraints that practitioners face in implementation.
 
-A significant contribution of this work lies in the systematic comparison of different portfolio construction approaches. The analysis encompasses traditional L2 regularization, which provides analytical tractability, L1 regularization for sparse solutions, and a novel weighted error optimization method. Through extensive empirical testing, we demonstrate that the weighted error optimization consistently outperforms conventional regularization approaches in economically significant regions of the payoff profile. This superior performance stems from its ability to focus the portfolio construction where it matters most, resulting in more reliable trading strategies.
+A significant contribution of this work lies in the systematic comparison of different portfolio 
+construction approaches and the novel idea of making payoffs directly proportional to estimated 
+price distributions. The analysis encompasses traditional L2 regularization, which provides 
+analytical tractability, L1 regularization for sparse solutions, and a novel weighted error 
+optimization method. Through extensive empirical testing, we demonstrate that the weighted error 
+optimization consistently outperforms conventional regularization approaches in regions with 
+significant probability mass. This superior performance stems from its ability to focus the 
+portfolio construction where the underlying asset price is most likely to be at expiration, 
+resulting in more reliable trading strategies.
 
-The framework's implementation guidelines strike a careful balance between computational efficiency and approximation accuracy. This balance is achieved through thoughtful parameter selection and optimization techniques, making the methodology particularly suitable for real-world applications where both precision and computational speed are crucial considerations.
+The framework's implementation guidelines strike a careful balance between computational efficiency 
+and approximation accuracy. This balance is achieved through thoughtful parameter selection and 
+optimization techniques, making the methodology particularly suitable for real-world applications 
+where both precision and computational speed are crucial considerations.
 
-The empirical results conclusively demonstrate that while regularization methods offer mathematical elegance and analytical solutions in some cases, the weighted error optimization approach provides markedly superior results for practical trading applications by focusing on economically meaningful regions of the payoff profile.
+The empirical results conclusively demonstrate that while regularization methods offer mathematical 
+elegance and analytical solutions in some cases, the weighted error optimization approach provides 
+markedly superior results for practical trading applications by focusing on regions with significant 
+probability mass in the estimated price distribution.
 
-Looking forward, this research opens several promising avenues for future investigation. Dynamic rebalancing strategies could enhance the framework's adaptability to changing market conditions. Integration with machine learning-based distribution forecasting might improve the accuracy of underlying assumptions. Furthermore, extension to multi-asset scenarios would broaden the methodology's applicability. The framework's inherent flexibility suggests potential applications beyond traditional option markets, including emerging derivative products and alternative asset classes, positioning it as a valuable tool for modern financial engineering.
+Looking forward, this research opens several promising avenues for future investigation. Dynamic 
+rebalancing strategies could enhance the framework's adaptability to changing market conditions. 
+Integration with machine learning-based distribution forecasting might improve the accuracy of 
+underlying assumptions. Furthermore, extension to multi-asset scenarios would broaden the 
+methodology's applicability. The framework's inherent flexibility suggests potential applications 
+beyond traditional option markets, including emerging derivative products and alternative asset 
+classes, positioning it as a valuable tool for modern financial engineering.
 
 The source code of the numerical experiments is available on \href{https://github.com/VladKochetov007/payoff_approximation}{GitHub}.
 
