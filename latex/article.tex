@@ -82,6 +82,33 @@ options, due to their simplicity and widespread availability, serve as ideal
 building blocks for such approximations. This paper introduces an approach to 
 approximating arbitrary payoff profiles using a combination of these options.
 
+The traditional approach to financial modeling often relies heavily on assumptions about
+the underlying price distribution, with the normal distribution being the most common choice
+due to its mathematical tractability. However, empirical evidence consistently shows that
+market price distributions exhibit significant deviations from normality \citep{Pokharel2024},
+particularly in the form of heavy tails and higher moments that cannot be captured by simple
+parametric models. This mismatch between theoretical assumptions and market reality can lead to
+systematic pricing errors and risk underestimation.
+
+Presented approach addresses these limitations by embracing the stochastic nature of markets
+without imposing restrictive distributional assumptions. Instead of attempting to fit
+market behavior into predetermined probability distributions as in \citep{Kuang2023}, 
+this paper proposes a framework that can accommodate any empirically observed distribution. This 
+distribution-free modeling approach acknowledges the complex, non-Gaussian nature of 
+market price movements, which often exhibit fat tails and asymmetric behavior. It allows 
+for direct incorporation of empirical distribution forecasts, enabling more accurate risk 
+assessment and pricing.
+Furthermore, the framework provides a flexible mechanism for extracting value from market
+inefficiencies without relying on specific distributional assumptions, while being able
+to adapt to changing market conditions and regime shifts that affect the shape of price
+distributions.
+
+The proposed methodology bridges the gap between theoretical option pricing models
+and observed market behavior by providing a practical framework for implementing
+distribution-based trading strategies. By focusing on distribution forecasting
+rather than point predictions, traders can develop more robust strategies that
+account for the full spectrum of possible market outcomes.
+
 \section{Literature Review}
 The theoretical foundations of option portfolio optimization were established in the work of 
 \citep{Carr01012001}, which demonstrated the theoretical possibility of replicating 
