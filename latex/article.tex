@@ -243,58 +243,56 @@ formulations may better reflect trading objectives. Two notable generalizations 
     \end{equation}
 \end{enumerate}
 
+However, these generalizations lose the analytical tractability of the L2 case, 
+requiring numerical optimization methods for solution.
+
+\subsection{Numerical Implementation}
+The implementation leverages the analytical solution derived in the Mathematical Framework 
+section for L2-regularized problems. For L1 regularization and alternative loss functions, 
+numerical optimization methods are employed.
+
+\begin{figure}[htbp]
+\centering
+\input{regularization_comparison.tex}
+\caption{Comparison of L1 and L2 regularization methods in approximating a complex payoff profile. 
+While both methods achieve reasonable approximation quality, L2 regularization provides smoother results 
+and L1 regularization favors a sparser representation with fewer non-zero option weights.}
+\label{fig:regularization}
+\end{figure}
+
 \begin{figure}[htbp]
 \centering
 \input{weighted_loss.tex}
-\caption{Weighted Error Method Performance}
+\caption{Performance of the weighted error method, demonstrating superior accuracy in regions 
+with larger payoff values. This approach provides more economically meaningful results by 
+emphasizing the approximation quality where it matters most for trading applications.}
 \label{fig:weighted}
 \end{figure}
 
-The weighted error formulation provides error weighting proportional to the target payoff magnitude, 
-offering economic interpretation well-aligned with trading objectives. Furthermore, it 
-naturally enhances focus on regions with significant payoff values, making it particularly 
-suitable for practical applications.
-
 \input{method_comparison.tex}
 
-The empirical results presented in Table~\ref{tab:method_comparison} demonstrate clear 
-superiority of the weighted error method across all regularization parameters. While the 
-L2 regularization provides an analytical solution, making it computationally attractive, 
-the weighted method consistently achieves MAE around 1.04, significantly outperforming 
-both L1 and L2 approaches. The L2 method shows stable but inferior performance with MAE 
-around 1.45, while L1 regularization's performance deteriorates significantly as $\gamma$ 
-increases, with MAE growing from 1.45 to 4.62.
+Table~\ref{tab:method_comparison} presents a comparative analysis of the three regularization 
+methods across different regularization parameters ($\gamma$). The Mean Absolute Error (MAE) 
+is used as the primary metric for comparison, providing a direct measure of approximation accuracy 
+in absolute terms. Lower MAE values indicate better approximation quality.
 
-This comprehensive comparison suggests that for practical applications, the weighted error 
-method should be preferred despite its requirement for numerical optimization. The improved 
-accuracy (approximately 30\% reduction in MAE compared to L2) and consistent performance 
-across different regularization parameters justify the additional computational cost.
+The results demonstrate that:
+\begin{itemize}
+    \item While L2 regularization provides an analytical solution and shows consistent performance 
+    (MAE ~1.45), it may not be the optimal choice for practical applications.
+    \item L1 regularization achieves comparable accuracy for low $\gamma$ values while promoting 
+    sparser solutions, but its performance deteriorates significantly as regularization increases.
+    \item The weighted error method consistently outperforms both L1 and L2 approaches, maintaining 
+    superior accuracy (MAE ~1.04) across all tested regularization values. This makes it the most 
+    suitable choice for real-world trading applications, where accuracy in high-payoff regions is 
+    crucial for portfolio performance.
+\end{itemize}
 
-\section{Results}
-\subsection{Distribution-Based Trading}
-The approximation method enables novel trading strategies that exploit distributional 
-forecasts rather than direct price predictions. Traders can hedge against forecasted 
-distribution features, express views on higher moments of price distribution, and 
-implement volatility surface arbitrage strategies through carefully constructed 
-option portfolios.
-
-The key advantage emerges when combining the approximation with distribution 
-forecasts $\mathbb{P}(S_T)$:
- 
-\begin{equation}
-\mathbb{E}[V(S_T)] = 
-    \int_{0}^{\infty} 
-        V(S) \mathbb{P}(S_T = S) dS
-\end{equation}
-
-Optimal portfolio weights $\boldsymbol{\theta}^*$ maximize the expected payoff under 
-forecasted distribution:
-
-\begin{equation}
-\boldsymbol{\theta}^* = 
-    \argmax_{\boldsymbol{\theta}} 
-        \mathbb{E}\left[\hat{V}(S_T;\boldsymbol{\theta})\right]
-\end{equation}
+Despite the mathematical elegance and analytical tractability of the L2 approach, the empirical 
+results strongly suggest that the weighted error method is more appropriate for practical 
+implementation. Its ability to focus on economically significant regions and maintain consistent 
+performance across different regularization parameters makes it the preferred choice for 
+real-world trading applications.
 
 \section{Conclusion}
 
