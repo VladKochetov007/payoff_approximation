@@ -45,6 +45,6 @@ make help   # Show all available commands
     Kochetov2025,
     author   = {Kochetov, Vlad},
     title    = {From Distribution Forecasts to Vanilla Portfolios: Regularized Payoff Approximation in Discrete Space},
-  year     = {2025},
+    year     = {2025},
 }
 ```
