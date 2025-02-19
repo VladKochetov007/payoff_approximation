@@ -275,6 +275,23 @@ values. This approach is particularly useful when the economic significance of e
 varies with the magnitude of the target payoff, providing a more practical solution 
 for trading applications.
 
+\input{method_comparison.tex}
+
+The empirical results presented in Table~\ref{tab:method_comparison} demonstrate clear 
+superiority of the weighted error method across all regularization parameters. While the 
+L2 regularization provides an analytical solution, making it computationally attractive, 
+the weighted method consistently achieves MAE around 1.04, significantly outperforming 
+both L1 and L2 approaches. The L2 method shows stable but inferior performance with MAE 
+around 1.45, while L1 regularization's performance deteriorates significantly as $\gamma$ 
+increases, with MAE growing from 1.45 to 4.62.
+
+This comprehensive comparison suggests that for practical applications, the weighted error 
+method should be preferred despite its requirement for numerical optimization. The improved 
+accuracy (approximately 30\% reduction in MAE compared to L2) and consistent performance 
+across different regularization parameters justify the additional computational cost. 
+Furthermore, the weighted method's focus on economically significant regions makes it 
+particularly well-suited for real-world trading applications.
+
 \section{Results}
 \subsection{Distribution-Based Trading}
 The approximation method enables novel trading strategies that exploit distributional 
@@ -299,27 +316,7 @@ forecasted distribution:
 \boldsymbol{\theta}^* = 
     \argmax_{\boldsymbol{\theta}} 
         \mathbb{E}\left[\hat{V}(S_T;\boldsymbol{\theta})\right] - 
-        \lambda \text{Var}\left(\hat{V}(S_T;\boldsymbol{\theta})\right)
 \end{equation}
-
-where $\lambda$ represents risk aversion parameter.
-
-\input{method_comparison.tex}
-
-Table~\ref{tab:method_comparison} presents a comparative analysis of the three regularization 
-methods across different regularization parameters ($\gamma$). The Mean Absolute Error (MAE) 
-is used as the primary metric for comparison, providing a direct measure of approximation accuracy 
-in absolute terms. Lower MAE values indicate better approximation quality.
-
-The results demonstrate that:
-\begin{itemize}
-    \item L2 regularization provides consistent performance across different $\gamma$ values,
-    showing good stability in the approximation.
-    \item L1 regularization achieves comparable accuracy while promoting sparser solutions,
-    which can be advantageous for portfolio implementation.
-    \item The weighted error method shows improved accuracy in regions with larger payoff
-    values, as reflected in its MAE scores, particularly for moderate regularization values.
-\end{itemize}
 
 \section{Conclusion}
 
