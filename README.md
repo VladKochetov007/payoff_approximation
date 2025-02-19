@@ -1,7 +1,5 @@
 # Payoff Approximation Research
 
-> ⚠️ **Note**: This research paper is currently under active development.
-
 This repository contains source code and LaTeX files for a research paper on approximating complex payoff profiles using vanilla options with regularization techniques.
 
 ## Project Structure
