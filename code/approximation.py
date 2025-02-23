@@ -327,7 +327,7 @@ def example_usage():
         print(f"Spot position: {lambda_weighted:.2f}")
         
     # Generate comparison table for different regularization values
-    regularization_values = [0.01, 0.05, 0.1, 0.5, 10]
+    regularization_values = [0, 0.01, 0.05, 0.1, 0.5, 10]
     generate_comparison_table(target, strikes, spot=100, regularization_values=regularization_values)
 
 if __name__ == "__main__":
